@@ -1,0 +1,85 @@
+version: '3'
+services:
+  mysql:
+    container_name: zc-mysql8
+    image: mysql:${MYSQL_VERSION}
+    restart: always
+    ports:
+      - 3309:3306
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ${MYSQL_DIR}/data:/var/lib/mysql
+      - ${MYSQL_DIR}/conf:/etc/mysql/conf.d/
+      - ${MYSQL_DIR}/logs:/logs
+    command:
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+      --explicit_defaults_for_timestamp=true
+      --lower_case_table_names=1
+  Redis:
+    container_name: zc-redis6
+    image: redis:${REDIS_VERSION}
+    restart: always
+    volumes:
+      - ${REDIS_DIR}/data:/data
+      - ${REDIS_DIR}/conf/redis.conf:/etc/redis/redis.conf
+    ports:
+      - ${REDIS_PORT}:6379
+    command: redis-server /etc/redis/redis.conf
+  Etcd:
+    container_name: zc-etcd3
+    image: bitnami/etcd:${ETCD_VERSION}
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+    privileged: true
+    volumes:
+      - ${ETCD_DIR}/data:/bitnami/etcd/data
+    ports:
+      - ${ETCD_PORT}:2379
+      - 2380:2380
+  mongo:
+    image: mongo:4.2.1
+    restart: always
+    container_name: zc-mongo
+    ports:
+      - 27018:27017
+    volumes:
+      - ${MONGO_DIR}/db:/data/db # 挂载数据目录
+      - ${MONGO_DIR}/log:/var/log/mongodb  # 挂载日志目录
+    privileged: true  # 设置容器的权限为root
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root123
+  zookeeper:
+    image: docker.io/bitnami/zookeeper:3.8
+    container_name: zc-zookeeper
+    ports:
+      - "2181:2181"
+    volumes:
+      - ${ZK_DIR}/bitnami:/bitnami
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes # 匿名登录
+  kafka:
+    image: docker.io/bitnami/kafka:3.4
+    container_name: zc-kafka
+    ports: #记得在防火墙开放端口
+      - "9092:9092"
+      - "9093:9093"
+    volumes:
+      - ${KAFKA_DIR}/bitnami:/bitnami
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes # 配置监听者的安全协议
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT # 定义Kafka Broker的Listener的配置项，配置外部访问和内部访问
+      - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://0.0.0.0:9093 # 将Broker的Listener信息发布到Zookeeper中，供Clients（Producer/Consumer）使用
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:9092,EXTERNAL://192.168.0.104:9093 # dev.wsl.net 换成自己的ip
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
+    depends_on:
+      - zookeeper

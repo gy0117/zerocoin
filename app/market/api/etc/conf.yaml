@@ -1,0 +1,13 @@
+Name: market-api
+Host: 0.0.0.0
+Port: 8889
+MarketRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: market.rpc
+Kafka:
+  Addr: "192.168.0.104:9093"
+  WriteCap: 100
+  ReadCap: 100
+  ConsumerGroup: "kline1m-thumb-consumer"

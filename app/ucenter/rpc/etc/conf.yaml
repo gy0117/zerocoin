@@ -1,0 +1,36 @@
+Name: ucenter.rpc
+ListenOn: 0.0.0.0:8081
+Etcd:
+  Hosts:
+  - 127.0.0.1:2379
+  Key: ucenter.rpc
+Mysql:
+  DataSource: root:root@tcp(127.0.0.1:3309)/zerocoin_ucenter?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+CacheRedis:
+  - Host: 127.0.0.1:6379
+    Type: node
+CaptchaVerify:
+  Vid: 65130eb2d480772c07230f01
+  SecretKey: 6658cd322998427c95ce0be084c49c5f
+JWT:
+  AccessSecret: "zerocoin-gogohigher-!@#$"
+  AccessExpire: 604800
+  Issuer: "zerocoin-marsxingzhi"
+MarketRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: market.rpc
+  NonBlock: true  # 在启动ucenter.rpc时，market.rpc没有启动不会报错
+Kafka:
+  Addr: "192.168.0.104:9093"
+  WriteCap: 100
+  ReadCap: 100
+  ConsumerGroup: "ucenter-exchangeorder-consumer"
+ExchangeRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: exchange.rpc
+  NonBlock: true
+Mode: dev

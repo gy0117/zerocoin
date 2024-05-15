@@ -1,0 +1,12 @@
+Name: exchange-api
+Host: 0.0.0.0
+Port: 8890
+ExchangeRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: exchange.rpc
+Jwt:
+  AccessSecret: "zerocoin-gogohigher-!@#$"
+  AccessExpire: 604800
+  Issuer: "zerocoin-marsxingzhi"

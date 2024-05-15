@@ -1,0 +1,25 @@
+Okx:
+  ApiKey: "709439b5-cbcd-4955-9627-8d1e72ab6305"
+  SecretKey: "F50CB5503329ED82051D4528ED395B7F"
+  Passphrase: "Zerocoin-Marsxingzhi-123"
+  Host: "https://www.okx.com"
+  Proxy: "http://localhost:7890"
+Mongo:
+  Url: "mongodb://localhost:27018"
+  Username: "root"
+  Password: "root123"
+  DbName: "zerocoin-mongo"
+Kafka:
+  Addr: "192.168.0.104:9093"
+  WriteCap: 100
+  ReadCap: 100
+Redis:
+  - Host: 127.0.0.1:6379
+    Type: node
+Bitcoin:
+  Url: http://127.0.0.1:18332
+UCenterRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: ucenter.rpc
