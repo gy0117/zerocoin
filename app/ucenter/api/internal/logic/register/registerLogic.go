@@ -36,7 +36,7 @@ func (l *RegisterLogic) Register(req *types.Request) (*types.RegisterResp, error
 	if err := copier.Copy(registerReq, req); err != nil {
 		return nil, err
 	}
-	logx.Infof("registerReq: %+v", registerReq)
+	//logx.Infof("registerReq: %+v", registerReq)
 
 	registerResp, err := l.svcCtx.UCRegisterRpc.RegisterByPhone(ctx, registerReq)
 	if err != nil {
