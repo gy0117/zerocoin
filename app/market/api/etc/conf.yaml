@@ -7,7 +7,7 @@ MarketRpc:
       - 127.0.0.1:2379
     Key: market.rpc
 Kafka:
-  Addr: "192.168.0.104:9093"
+  Addr: "192.168.0.101:9093"
   WriteCap: 100
   ReadCap: 100
   ConsumerGroup: "kline1m-thumb-consumer"
