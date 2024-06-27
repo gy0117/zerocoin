@@ -79,7 +79,7 @@ services:
       - ALLOW_PLAINTEXT_LISTENER=yes # 配置监听者的安全协议
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT # 定义Kafka Broker的Listener的配置项，配置外部访问和内部访问
       - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://0.0.0.0:9093 # 将Broker的Listener信息发布到Zookeeper中，供Clients（Producer/Consumer）使用
-      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:9092,EXTERNAL://192.168.0.101:9093 # dev.wsl.net 换成自己的ip
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:9092,EXTERNAL://192.168.0.104:9093 # dev.wsl.net 换成自己的ip
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
     depends_on:
       - zookeeper
