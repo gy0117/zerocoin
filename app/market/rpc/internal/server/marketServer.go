@@ -21,9 +21,9 @@ func NewMarketServer(svcCtx *svc.ServiceContext) *MarketServer {
 	}
 }
 
-func (ms *MarketServer) FindCoinThumbTrend(ctx context.Context, in *market.MarketRequest) (*market.CoinThumbResponse, error) {
+func (ms *MarketServer) FindSymbolThumbTrend(ctx context.Context, in *market.MarketRequest) (*market.CoinThumbResponse, error) {
 	l := logic.NewMarketLogic(ctx, ms.svcCtx)
-	return l.FindCoinThumbTrend(in)
+	return l.FindSymbolThumbTrend(in)
 }
 
 func(ms *MarketServer) FindSymbolInfo(ctx context.Context, in *market.MarketRequest) (*market.ExchangeCoin, error)  {

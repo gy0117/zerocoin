@@ -24,8 +24,8 @@ func NewMarketDomain(db *mongo.Database) *MarketDomain {
 	}
 }
 
-// FindCoinThumbTrend 一个CoinThumb对象就是一个coin的行情数据
-func (d *MarketDomain) FindCoinThumbTrend(coins []*model.ExchangeCoin) []*market.CoinThumb {
+// FindSymbolThumbTrend 一个CoinThumb对象就是一个coin的行情数据
+func (d *MarketDomain) FindSymbolThumbTrend(coins []*model.ExchangeCoin) []*market.CoinThumb {
 	// 从mongodb中找出24h内的数据
 	coinThumbs := make([]*market.CoinThumb, len(coins))
 

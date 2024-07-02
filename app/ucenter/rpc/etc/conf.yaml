@@ -23,7 +23,7 @@ MarketRpc:
     Key: market.rpc
   NonBlock: true  # 在启动ucenter.rpc时，market.rpc没有启动不会报错
 Kafka:
-  Addr: "192.168.0.104:9093"
+  Addr: "192.168.0.101:9093"
   WriteCap: 100
   ReadCap: 100
   ConsumerGroup: "ucenter-exchangeorder-consumer"

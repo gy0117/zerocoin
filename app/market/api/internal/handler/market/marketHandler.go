@@ -10,14 +10,14 @@ import (
 	"zero-common/tools"
 )
 
-// CoinThumbTrend 币种行情
-func CoinThumbTrend(svcCtx *svc.ServiceContext) http.HandlerFunc {
+// SymbolThumbTrendHandler 获取币种行情
+func SymbolThumbTrendHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.MarketRequest
 		req.Ip = tools.GetRemoteClientIp(r)
 
 		l := market.NewMarketLogic(r.Context(), svcCtx)
-		resp, err := l.CoinThumbTrend(&req)
+		resp, err := l.SymbolThumbTrend(&req)
 		result.HttpResult(r.Context(), w, resp, err)
 	}
 }

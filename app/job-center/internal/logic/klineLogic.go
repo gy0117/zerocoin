@@ -18,6 +18,8 @@ import (
 
 const success = "0"
 
+const bar_1m = "1m"
+
 type OkxResult struct {
 	Code string     `json:"code"`
 	Msg  string     `json:"msg"`
@@ -43,7 +45,7 @@ func NewKline(conf config.OkxConfig, client *db.MongoClient, kCli *kafka.KafkaCl
 }
 
 func (k *Kline) Do(duration string) {
-	logx.Info("=== start pull K-line data, duration: ", duration, " ===")
+	logx.Info("job-center | klineLogic | start pull K-line data, duration: ", duration)
 
 	k.wg.Add(2)
 	go k.getKlineData("BTC-USDT", "BTC/USDT", duration)
@@ -82,17 +84,18 @@ func (k *Kline) getKlineData(instId, symbol, bar string) {
 
 	if result.Code == success {
 		// 将数据存入mongo db
-		err = k.klineDomain.SaveBatch(context.Background(), result.Data, symbol, bar)
+		ctx := context.Background()
+		err = k.klineDomain.SaveBatch(ctx, result.Data, symbol, bar)
 		if err != nil {
 			logx.Error(err)
 		}
 
-		if "1m" == bar {
+		if bar == bar_1m {
 			// 发送给kafka，将最新的数据 推送给market服务，前端实时变化
 			if len(result.Data) > 0 {
 
 				data := result.Data[0]
-				go k.queueDomain.Send1mKline(context.Background(), data, symbol)
+				go k.queueDomain.Send1mKline(ctx, data, symbol)
 
 				key := strings.ReplaceAll(instId, "-", "::")
 				// BTC-USDT，收盘价格 BTC::USDT::RATE

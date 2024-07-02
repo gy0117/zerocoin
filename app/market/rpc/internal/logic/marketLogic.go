@@ -31,12 +31,12 @@ func NewMarketLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MarketLogi
 	}
 }
 
-func (l *MarketLogic) FindCoinThumbTrend(in *market.MarketRequest) (*market.CoinThumbResponse, error) {
+func (l *MarketLogic) FindSymbolThumbTrend(in *market.MarketRequest) (*market.CoinThumbResponse, error) {
 	// 1. 先找到支持哪些coin
 	coins := l.exchangeCoinDomain.FindCoinVisible(l.ctx)
 
 	// 2. 找到所支持的coin的行情
-	coinThumbs := l.marketDomain.FindCoinThumbTrend(coins)
+	coinThumbs := l.marketDomain.FindSymbolThumbTrend(coins)
 
 	resp := &market.CoinThumbResponse{
 		List: coinThumbs,
