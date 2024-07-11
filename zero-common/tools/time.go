@@ -6,6 +6,7 @@ func ISO(t time.Time) string {
 	return t.UTC().Format(time.RFC3339)
 }
 
+// ZeroTime 零点时间时区
 func ZeroTime() int64 {
 	now := time.Now()
 	date := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())

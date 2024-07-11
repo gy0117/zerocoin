@@ -9,6 +9,7 @@ import (
 	"zero-common/result"
 )
 
+// WalletHandler 获取用户钱包信息
 func WalletHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.WalletReq

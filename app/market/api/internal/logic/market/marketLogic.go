@@ -2,7 +2,6 @@ package market
 
 import (
 	"context"
-	"fmt"
 	"github.com/jinzhu/copier"
 	"grpc-common/market/types/market"
 	"market-api/internal/svc"
@@ -127,7 +126,6 @@ func (l *MarketLogic) SymbolInfo(req *types.MarketRequest) (*types.ExchangeCoinR
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("SymbolInfo---result: %+v\n", result)
 	resp := &types.ExchangeCoinResp{}
 	if err = copier.Copy(resp, result); err != nil {
 		logx.Error(err)

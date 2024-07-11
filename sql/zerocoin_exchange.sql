@@ -21,7 +21,7 @@ CREATE TABLE `exchange_order`
     `traded_amount`  decimal(18, 8)                                                NOT NULL DEFAULT 0.00000000 COMMENT '成交量',
     `turnover`       decimal(18, 8)                                                NOT NULL DEFAULT 0.00000000 COMMENT '成交额 ',
     `type`           int(0) NOT NULL COMMENT '挂单类型 0 市场价 1 最低价',
-    `use_discount`   varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '是否使用折扣 0 不使用 1使用',
+    `use_discount`   varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '是否使用折扣 0 不使用 1 使用',
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE INDEX `order_id`(`order_id`) USING BTREE,
     INDEX            `index_user_id_time`(`user_id`, `time`) USING BTREE

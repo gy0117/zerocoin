@@ -12,6 +12,7 @@ import (
 )
 
 // GetHistoryOrders handler --- logic -- domain --- repo(dao)
+// 历史委托订单
 func GetHistoryOrders(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.ExchangeReq
@@ -26,6 +27,7 @@ func GetHistoryOrders(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	}
 }
 
+// GetCurrentOrders 当前委托订单
 func GetCurrentOrders(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.ExchangeReq
@@ -40,6 +42,7 @@ func GetCurrentOrders(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	}
 }
 
+// AddOrder 发布委托
 func AddOrder(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.ExchangeReq

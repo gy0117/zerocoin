@@ -31,7 +31,7 @@ func (d *OrderDomain) GetHistoryOrder(ctx context.Context, symbol string, memId 
 		return nil, 0, err
 	}
 	if list == nil {
-		return nil, 0, errors.New("没有找到对应数据")
+		return nil, 0, errors.New("data not found")
 	}
 	return list, total, nil
 }
@@ -42,7 +42,7 @@ func (d *OrderDomain) GetCurrentOrder(ctx context.Context, symbol string, memId 
 		return nil, 0, err
 	}
 	if list == nil {
-		return nil, 0, errors.New("没有找到对应数据")
+		return nil, 0, errors.New("data not found")
 	}
 	return list, total, nil
 }

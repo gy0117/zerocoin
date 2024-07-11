@@ -65,7 +65,7 @@ func addWalletRouters(server *rest.Server, serverCtx *svc.ServiceContext) {
 		{
 			Method:  http.MethodPost,
 			Path:    "/uc/asset/wallet/:coinName",
-			Handler: wallet.WalletHandler(serverCtx),  // 获取用户钱包信息
+			Handler: wallet.WalletHandler(serverCtx),
 		},
 		{
 			Method:  http.MethodPost,
