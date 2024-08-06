@@ -19,7 +19,7 @@ import (
 // 1. 先实现买卖盘的逻辑，买入 卖出 一旦匹配完成，就成交了，成交的价格和数量，就会成为别人的参考，买卖盘实时的
 
 const (
-	topicExchangeOrderTrading           = "exchange_order_trading"
+	topicExchangeOrderTrading           = "exchange_order_trading" // 将订单发送到撮合交易中
 	topicExchangeOrderComplete          = "exchange_order_complete"
 	topicUpdateWalletAfterOrderComplete = "update_wallet_after_order_complete"
 )
@@ -60,7 +60,7 @@ func (kc *KafkaConsumer) consumeTradingOrder() {
 func (kc *KafkaConsumer) readTradingOrder(client *kafka.KafkaClient) {
 	for {
 		kafkaData := client.Read()
-		logx.Info("KafkaConsumer | readTradingOrder | topic: ", kafkaData.Topic, ", orderId: ", string(kafkaData.Key), ", kafkaData: ", string(kafkaData.Data))
+		logx.Info("[exchange-rpc] kafkaConsumer | readTradingOrder | topic: ", kafkaData.Topic, ", orderId: ", string(kafkaData.Key), ", kafkaData: ", string(kafkaData.Data))
 
 		var exchangeOrder *model.ExchangeOrder
 		err := json.Unmarshal(kafkaData.Data, &exchangeOrder)
@@ -87,14 +87,18 @@ func (kc *KafkaConsumer) readTradingOrder(client *kafka.KafkaClient) {
 	}
 }
 
+// 订单交易成功后，需要做两个处理
+// 1. 更新数据库订单信息
+// 2. 更新钱包
 func (kc *KafkaConsumer) readCompleteOrder(client *kafka.KafkaClient, orderDomain *domain.OrderDomain) {
 	for {
 		kafkaData := client.Read()
-		logx.Info("KafkaConsumer | readCompleteOrder | topic: ", string(kafkaData.Topic), ", orderId: ", string(kafkaData.Key), ", kafkaData: ", string(kafkaData.Data))
+		logx.Info("[exchange-rpc] | KafkaConsumer | readCompleteOrder | topic: ", kafkaData.Topic, ", orderId: ", string(kafkaData.Key), ", kafkaData: ", string(kafkaData.Data))
+
 		var exchangeOrder *model.ExchangeOrder
 		err := json.Unmarshal(kafkaData.Data, &exchangeOrder)
 		if err != nil {
-			logx.Error("KafkaConsumer | Unmarshal err: ", err)
+			logx.Error("[exchange-rpc] | KafkaConsumer | Unmarshal err: ", err)
 			continue
 		}
 
@@ -107,7 +111,7 @@ func (kc *KafkaConsumer) readCompleteOrder(client *kafka.KafkaClient, orderDomai
 			continue
 		}
 
-		// 通知钱包更新（kafka）
+		// 2. 通知钱包更新（kafka）
 		for {
 			kafkaData.Topic = topicUpdateWalletAfterOrderComplete
 			err2 := client.SendSync(kafkaData)
@@ -116,7 +120,7 @@ func (kc *KafkaConsumer) readCompleteOrder(client *kafka.KafkaClient, orderDomai
 				time.Sleep(time.Millisecond * 250)
 				continue
 			}
-			logx.Info("发送 update_wallet_after_order_complete 消息, orderId: " + exchangeOrder.OrderId)
+			logx.Info("[exchange-rpc] | KafkaConsumer ｜ 发送 update_wallet_after_order_complete 消息, orderId: " + exchangeOrder.OrderId)
 			break
 		}
 	}

@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	topicAddExchangeOrder               = "add_exchange_order" // 发布委托（创建订单）topic
-	topicUpdateWalletAfterOrderComplete = "update_wallet_after_order_complete"
+	topicAddExchangeOrder               = "add_exchange_order"                 // 发布委托（创建订单），创建订单成功后，需要冻结钱包的钱
+	topicUpdateWalletAfterOrderComplete = "update_wallet_after_order_complete" // 订单交易成功后，接收【更新钱包】通知
 	topicBtcTransaction                 = "btc_transaction"
 	topicBtcWithdraw                    = "btc_withdraw"
 )

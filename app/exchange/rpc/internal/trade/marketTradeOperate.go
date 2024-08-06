@@ -9,10 +9,10 @@ import (
 
 // MarketTradeOperate 市价交易操作
 type MarketTradeOperate struct {
-	buyMarketQueue queue.TradeTimeQueue // 买入市价队列
+	buyMarketQueue queue.TradeTimeQueue // 以市价买入队列
 	bmqLock        sync.RWMutex
 
-	sellMarketQueue queue.TradeTimeQueue // 卖出市价队列
+	sellMarketQueue queue.TradeTimeQueue // 以市价卖出队列
 	smqLock         sync.RWMutex
 }
 

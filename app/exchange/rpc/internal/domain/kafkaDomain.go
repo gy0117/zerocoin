@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	topicExchangeOrderInitComplete = "exchange_order_init_complete"
-	topicExchangeOrderTrading      = "exchange_order_trading"
+	topicExchangeOrderInitComplete = "exchange_order_init_complete" // 钱包的钱冻结成功后，需要修改钱包状态
+	topicExchangeOrderTrading      = "exchange_order_trading"       // 将订单发送到撮合交易中
 )
 
 type OrderResult struct {
@@ -57,31 +57,31 @@ func (d *KafkaDomain) SendOrderAdd(topic string, userId int64, orderId string, m
 		logx.Error(err)
 		return errors.New("the order message failed to send to Kafka")
 	}
-	logx.Info("Order created, message sent successfully，orderId: ", orderId)
+	logx.Info("【exchange-rpc】order created, message sent successfully，orderId: ", orderId)
 	return nil
 }
 
 // WaitAddOrderResult 接收【冻结之后，修改订单状态的消息】
 // 必须确保执行成功
 func (d *KafkaDomain) WaitAddOrderResult() {
-	logx.Info("WaitAddOrderResult | start modify order status")
+	logx.Info("【exchange-rpc】waitAddOrderResult | start modify order status")
 	client := d.cli.StartRead(topicExchangeOrderInitComplete)
 	for {
 		kData := client.Read()
-		logx.Info("读取exchange_order_init_complete 消息成功: " + string(kData.Key))
+		//logx.Info("【exchange-rpc】读取exchange_order_init_complete 消息成功: " + string(kData.Key))
 		var orderResult OrderResult
 		if err := json.Unmarshal(kData.Data, &orderResult); err != nil {
 			logx.Error("开始修改订单状态 | unmarshal err：", err)
 			continue
 		}
-		logx.Infof("开始修改订单状态 | orderResult：%+v\n", orderResult)
+		logx.Infof("【exchange-rpc】冻结成功后，开始修改订单状态 | orderResult：%+v\n", orderResult)
 		ctx := context.Background()
 		// 查询订单
 		exchangeOrder, err := d.orderDomain.FindByOrderId(ctx, &order.OrderReq{
 			OrderId: orderResult.OrderId,
 		})
 		if err != nil {
-			logx.Error("开始修改订单状态 | FindByOrderId err：", err)
+			logx.Error("【exchange-rpc】冻结成功后，开始修改订单状态 | FindByOrderId err：", err)
 			//client.RepeatPut(kData)
 			continue
 		}
@@ -93,7 +93,7 @@ func (d *KafkaDomain) WaitAddOrderResult() {
 			logx.Errorf("开始修改订单状态 | %s 订单已经被处理过了", orderResult.OrderId)
 			continue
 		}
-		logx.Infof("开始修改订单状态 | FindByOrderId exchangeOrder：%+v\n", exchangeOrder)
+		logx.Infof("【exchange-rpc】冻结成功后，开始修改订单状态 | FindByOrderId exchangeOrder：%+v\n", exchangeOrder)
 
 		// 将订单状态改成"交易中"
 		err = d.orderDomain.UpdateOrderStatus(ctx, orderResult.OrderId, model.StatusTrading)
@@ -108,7 +108,7 @@ func (d *KafkaDomain) WaitAddOrderResult() {
 		exchangeOrder.Status = model.StatusTrading
 		for {
 			marshal, _ := json.Marshal(exchangeOrder)
-			logx.Info("订单状态修改成功 | 发送到kafka marshal：", string(marshal))
+			logx.Info("【exchange-rpc】订单状态修改成功 | 发送到kafka：", string(marshal))
 
 			orderData := kafka.KafkaData{
 				Topic: topicExchangeOrderTrading,
@@ -121,7 +121,7 @@ func (d *KafkaDomain) WaitAddOrderResult() {
 				time.Sleep(250 * time.Millisecond)
 				continue
 			}
-			logx.Info("订单状态修改成功 | 发送订单数据到撮合交易，orderId: ", string(orderData.Key))
+			logx.Info("【exchange-rpc】订单状态修改成功 | 发送订单数据到撮合交易，orderId: ", string(orderData.Key))
 			break
 		}
 	}

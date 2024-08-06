@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/jinzhu/copier"
 	"github.com/zeromicro/go-zero/core/logx"
 	"grpc-common/market/types/market"
@@ -53,7 +52,22 @@ func (h *WsHandler) HandleTradePlate(symbol string, plate *model.TradePlateResul
 		logx.Error(err)
 		return
 	}
-	fmt.Printf("买卖盘信息，推送到前端 | HandleTradePlate marshal: %s\n", string(marshal))
 	h.wsServer.BroadcastToRoom("/", "/topic/market/trade-plate/"+symbol, string(marshal))
-	logx.Info("WsHandler | HandleTradePlate 买卖盘通知: ", plate.Direction, " ", symbol, ":", fmt.Sprintf("%d", len(plate.Items)))
+
+	// 买卖盘展示，log
+	showBuySellPlate(plate)
+}
+
+func showBuySellPlate(plate *model.TradePlateResult) {
+	if len(plate.Items) == 0 {
+		return
+	}
+	logx.Info("====== start 买卖盘展示 start ======")
+	logx.Infof("Symbol: %s, Direction: %s, MaxAmount: %f, MinAmount: %f, HighestPrice: %f, LowestPrice: %f",
+		plate.Symbol, plate.Direction, plate.MaxAmount, plate.MinAmount, plate.HighestPrice, plate.LowestPrice)
+	for i := 0; i < len(plate.Items); i++ {
+		item := plate.Items[i]
+		logx.Infof("item-%d, price: %f, amount: %f", i, item.Price, item.Amount)
+	}
+	logx.Info("====== end 买卖盘展示 end ======")
 }

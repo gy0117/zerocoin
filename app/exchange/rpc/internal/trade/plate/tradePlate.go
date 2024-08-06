@@ -36,6 +36,7 @@ type TradePlate struct {
 	lock      sync.RWMutex
 }
 
+// Add 加入到买盘
 func (p *TradePlate) Add(order *model.ExchangeOrder) {
 	// 遍历盘口数据，将价格一致的添加到一起
 	if p.direction != order.Direction {
@@ -56,6 +57,8 @@ func (p *TradePlate) Add(order *model.ExchangeOrder) {
 		if item.Price == order.Price {
 			// order.Amount委托的数量
 			// order.TradedAmount 已经成交的数量
+
+			// 盘口现有的 + 订单未成交的数量
 			item.Amount = operate.FloorFloat(item.Amount+order.Amount-order.TradedAmount, 8)
 			return
 		}
@@ -65,8 +68,8 @@ func (p *TradePlate) Add(order *model.ExchangeOrder) {
 	size := len(p.Items)
 	if size < p.maxDepth {
 		item := &TradePlateItem{
-			Amount: operate.FloorFloat(order.Amount-order.TradedAmount, 8),
 			Price:  order.Price,
+			Amount: operate.FloorFloat(order.Amount-order.TradedAmount, 8),
 		}
 		p.Items = append(p.Items, item)
 	}

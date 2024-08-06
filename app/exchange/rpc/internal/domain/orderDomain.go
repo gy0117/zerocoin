@@ -7,7 +7,6 @@ import (
 	"exchange-rpc/internal/model"
 	"exchange-rpc/internal/repo"
 	"grpc-common/exchange/types/order"
-	"grpc-common/market/mclient"
 	"grpc-common/ucenter/uclient"
 	"time"
 	"zero-common/operate"
@@ -55,7 +54,6 @@ func (d *OrderDomain) AddOrder(
 	ctx context.Context,
 	conn zerodb.DbConn,
 	order *model.ExchangeOrder,
-	coin *mclient.ExchangeCoinResp,
 	baseWallet *uclient.WalletResp,
 	coinWallet *uclient.WalletResp) (float64, error) {
 

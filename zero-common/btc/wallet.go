@@ -15,11 +15,11 @@ import (
 // Version 用于生成地址的版本
 const Version = byte(0x00)
 
-// AddressChecksumLen 用于生成地址的校验和位数
-const AddressChecksumLen = 4
-
 // TestVersion 用于生成测试网络地址的版本 3开头
 const TestVersion = byte(0x6F)
+
+// AddressChecksumLen 用于生成地址的校验和位数
+const AddressChecksumLen = 4
 
 // P2SHVersion P2SH 类型的地址支持多重签名 m或者n开头
 const P2SHVersion = byte(0x05)
@@ -62,40 +62,44 @@ func newKeyPair() (ecdsa.PrivateKey, []byte, error) {
 // 4. Version_PubKeyHash+CheckSum拼接成Version_PubKeyHash_CheckSum字节数组
 // 5. 对Version_PubKeyHash_CheckSum进行Base58编码即可得到地址Address
 
-// GetAddress 获取钱包地址 根据公钥生成地址
-func (wallet *Wallet) GetAddress() []byte {
+// GenerateBitcoinAddress 获取钱包地址 根据公钥生成地址
+func (wallet *Wallet) GenerateBitcoinAddress() []byte {
+	// 1. 对公钥做两次哈希
+	ripemd160HashSum := Sha256AndRipemd160Hash(wallet.PublicKey)
 
-	//1. 使用RIPEMD160(SHA256(PubKey)) 哈希算法，取公钥并对其哈希两次
-	ripemd160Hash := Ripemd160Hash(wallet.PublicKey)
-	//2.拼接版本
-	version_ripemd160Hash := append([]byte{Version}, ripemd160Hash...)
-	//3.两次sha256生成校验和
-	checkSumBytes := CheckSum(version_ripemd160Hash)
-	//4.拼接校验和
-	bytes := append(version_ripemd160Hash, checkSumBytes...)
+	// 2. 在RIPEMD-160 哈希前面加上版本字节，对于普通的比特币地址，这个字节是0x00
+	versionedPayload := append([]byte{Version}, ripemd160HashSum...)
 
-	//5.base58编码
-	return Base58Encode(bytes)
-}
+	// 3. 对版本化的负载进行双重 SHA-256 哈希，并取前4个字节作为校验和
+	checkSumBytes := CheckSum(versionedPayload)
 
-// GetTestAddress 获取钱包地址 根据公钥生成地址
-// 主网需要真实的钱，这里使用测试网络的地址
-func (wallet *Wallet) GetTestAddress() []byte {
-
-	//1.使用RIPEMD160(SHA256(PubKey)) 哈希算法，取公钥并对其哈希两次
-	ripemd160Hash := Ripemd160Hash(wallet.PublicKey)
-	//2.拼接版本
-	version_ripemd160Hash := append([]byte{TestVersion}, ripemd160Hash...)
-	//3.两次sha256生成校验和
-	checkSumBytes := CheckSum(version_ripemd160Hash)
-	//4.拼接校验和
-	bytes := append(version_ripemd160Hash, checkSumBytes...)
+	// 4. 将校验和附加道版本化的负载后面，使用 Base58 编码 得到最终的比特币地址
+	finalPayload := append(versionedPayload, checkSumBytes...)
 
 	//5.base58编码
-	return Base58Encode(bytes)
+	return Base58Encode(finalPayload)
 }
 
-func (wallet *Wallet) GetPrivateKey() string {
+// GenerateBitcoinTestAddress 获取钱包地址 根据公钥生成地址
+// 主网需要真实的钱，这里使用测试网络的地址，除了Version与主网不同，其余步骤完全相同
+func (wallet *Wallet) GenerateBitcoinTestAddress() []byte {
+	// 1. 对公钥做两次哈希
+	ripemd160HashSum := Sha256AndRipemd160Hash(wallet.PublicKey)
+
+	// 2.拼接版本
+	versionedPayload := append([]byte{TestVersion}, ripemd160HashSum...)
+
+	// 3. 对版本化的负载进行双重 SHA-256 哈希，并取前4个字节作为校验和
+	checkSumBytes := CheckSum(versionedPayload)
+
+	// 4. 将校验和附加道版本化的负载后面，使用 Base58 编码 得到最终的比特币地址
+	finalPayload := append(versionedPayload, checkSumBytes...)
+
+	//5.base58编码
+	return Base58Encode(finalPayload)
+}
+
+func (wallet *Wallet) GenerateBitcoinPrivateKey() string {
 	//序列化私钥
 	marshalECPrivateKey, _ := x509.MarshalECPrivateKey(&wallet.PrivateKey)
 	priBlock := pem.Block{
@@ -144,25 +148,22 @@ func (wallet *Wallet) IsValidForAddress(address []byte) bool {
 	return false
 }
 
-// Ripemd160Hash 将公钥进行两次哈希
-func Ripemd160Hash(publicKey []byte) []byte {
-	//1.hash256
-	hash256 := sha256.New()
-	hash256.Write(publicKey)
-	hash := hash256.Sum(nil)
+// Sha256AndRipemd160Hash 将公钥进行两次哈希
+func Sha256AndRipemd160Hash(publicKey []byte) []byte {
+	// 1. 对公钥进行 SHA-256 哈希
+	shahash256 := sha256.New()
+	shahash256.Write(publicKey)
+	sha256HashSum := shahash256.Sum(nil)
 
-	//2.ripemd160
-	ripemd160 := ripemd160.New()
-	ripemd160.Write(hash)
-
-	return ripemd160.Sum(nil)
+	// 2. 对 SHA-256 的结果进行 RIPEMD-160 哈希
+	ripemd160Hash := ripemd160.New()
+	ripemd160Hash.Write(sha256HashSum)
+	return ripemd160Hash.Sum(nil)
 }
 
-// CheckSum 两次sha256哈希生成校验和
+// CheckSum 两次SHA-256哈希生成校验和
 func CheckSum(bytes []byte) []byte {
-
 	hash1 := sha256.Sum256(bytes)
 	hash2 := sha256.Sum256(hash1[:])
-
 	return hash2[:AddressChecksumLen]
 }

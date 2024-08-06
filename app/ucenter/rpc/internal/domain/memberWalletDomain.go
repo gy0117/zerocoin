@@ -59,6 +59,7 @@ func (d *WalletDomain) Freeze(ctx context.Context, userId int64, money float64, 
 	if wallet.Balance < money {
 		return errors.New("insufficient balance")
 	}
+	// 冻结：将对应的余额减掉，冻结余额增加即可
 	return d.walletRepo.Freeze(ctx, userId, money, symbol)
 }
 

@@ -244,7 +244,7 @@ func (l *OrderLogic) AddOrder(req *order.OrderReq) (*order.AddOrderResp, error) 
 
 	err = l.transaction.Action(func(conn zerodb.DbConn) error {
 		// 1. 提交订单
-		money, err := l.orderDomain.AddOrder(ctx, conn, newOrder, exchangeCoinResp, baseSymbolWalletResp, coinSymbolWalletResp)
+		money, err := l.orderDomain.AddOrder(ctx, conn, newOrder, baseSymbolWalletResp, coinSymbolWalletResp)
 		if err != nil {
 			return errors.New("order submission failed")
 		}

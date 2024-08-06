@@ -82,7 +82,7 @@ func (ws *WebSocketServer) ServerHandler(next http.Handler) http.Handler {
 func (ws *WebSocketServer) BroadcastToRoom(path string, event string, data any) {
 	go func() {
 		ws.server.BroadcastToRoom(path, ROOM, event, data)
-		log.Println("通过socket.io发送到前端的数据，event：", event)
-		log.Println("通过socket.io发送到前端的数据，data：", data.(string))
+		//log.Println("通过socket.io发送到前端的数据，event：", event)
+		//log.Println("通过socket.io发送到前端的数据，data：", data.(string))
 	}()
 }
