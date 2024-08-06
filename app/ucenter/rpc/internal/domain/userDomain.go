@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/zeromicro/go-zero/core/logx"
+	"math/rand"
 	"ucenter-rpc/internal/dao"
 	"ucenter-rpc/internal/model"
 	"ucenter-rpc/internal/repo"
@@ -65,7 +66,7 @@ func (d *UserDomain) Register(ctx context.Context, username, phone, password, co
 	newUser.PromotionCode = promotion
 	newUser.FillSuperPartner(partner)
 	newUser.UserLevel = model.GENERAL
-	newUser.Avatar = "https://p2.itc.cn/q_70/images03/20230902/721191166cd2465c9db74d5b52a3e7bc.png"
+	newUser.Avatar = mockAvatar()
 
 	salt, newPwd := tools.Encode(password, nil)
 	newUser.Password = newPwd
@@ -78,4 +79,17 @@ func (d *UserDomain) Register(ctx context.Context, username, phone, password, co
 		return errors.New("failed to register, err is " + err.Error())
 	}
 	return nil
+}
+
+var mockAvatars = []string{
+	"https://img2020.cnblogs.com/blog/1001136/202108/1001136-20210812201703797-1406450632.jpg",
+	"https://gitee.com/dwxdfhx/aliyunDDns/raw/master/document/imgs/golang.jpg",
+	"https://img1.baidu.com/it/u=2267785998,1532636317&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=608",
+	"https://img1.baidu.com/it/u=10520225,3707199663&fm=253&fmt=auto&app=138&f=JPEG?w=474&h=443",
+	"https://pic2.zhimg.com/v2-6cc1138bb61aeecaa173ed140b0753a4_250x0.jpg?source=172ae18b",
+}
+
+func mockAvatar() string {
+	idx := rand.Intn(len(mockAvatars))
+	return mockAvatars[idx]
 }

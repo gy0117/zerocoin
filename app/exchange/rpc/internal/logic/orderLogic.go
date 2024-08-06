@@ -134,7 +134,7 @@ func (l *OrderLogic) GetCurrentOrder(in *order.OrderReq) (*order.OrderResp, erro
 	return resp, nil
 }
 
-// 发布委托：就是创建订单，一旦发布，就需要冻结钱和手续费
+// 发布委托：就是创建订单，一旦发布，就需要冻结 钱和手续费
 
 // AddOrder 逻辑
 // 1. 判断参数是否合法，判断钱是否足够
@@ -155,25 +155,25 @@ func (l *OrderLogic) AddOrder(req *order.OrderReq) (*order.AddOrderResp, error) 
 	defer cancel()
 
 	// 2. 查询用户的状态，是否禁止买卖（查询user表）
-	mReq := &user.UserRequest{
-		UserId: 1,
-	}
-	memberResp, err := l.svcCtx.UserRpc.FindUserById(ctx, mReq)
+	userResp, err := l.svcCtx.UserRpc.FindUserById(ctx, &user.UserRequest{
+		UserId: req.UserId,
+	})
 	if err != nil {
 		return nil, err
 	}
-	if memberResp.TransactionStatus == 0 {
+	// 交易状态，0 禁止交易
+	if userResp.TransactionStatus == 0 {
 		return nil, errors.New("current user must be forbidden trade")
 	}
 
-	// 3. 查询symbol是否可以交易（exchange_coin表）
-	marketReq := &market.MarketRequest{
+	// 3. 查表exchange_coin，对应的symbol是否可以交易
+	exchangeCoinResp, err := l.svcCtx.MarketRpc.FindSymbolInfo(ctx, &market.MarketRequest{
 		Symbol: req.Symbol,
-	}
-	exchangeCoinResp, err := l.svcCtx.MarketRpc.FindSymbolInfo(ctx, marketReq)
+	})
 	if err != nil {
 		return nil, err
 	}
+	// enable 状态，1：启用，2：禁止   exchangeable是否可交易，1：可交易
 	if exchangeCoinResp.Enable != 1 && exchangeCoinResp.Exchangeable != 1 {
 		return nil, errors.New(fmt.Sprintf("%s not tradable", req.Symbol))
 	}
@@ -181,33 +181,31 @@ func (l *OrderLogic) AddOrder(req *order.OrderReq) (*order.AddOrderResp, error) 
 	// 4. 查询待买入卖出的币是否支持（coin表中是否存在这个币）
 	coinUnit := exchangeCoinResp.GetBaseSymbol() // 基准币，例如：USDT
 	if req.Direction == model.DirectionSell {
-		coinUnit = exchangeCoinResp.GetCoinSymbol() // 交易币，例如：UTC
+		coinUnit = exchangeCoinResp.GetCoinSymbol() // 交易币，例如：BTC
 	}
-	marketReq = &market.MarketRequest{
+	_, err = l.svcCtx.MarketRpc.FindCoinInfo(ctx, &market.MarketRequest{
 		Unit: coinUnit,
-	}
-	_, err = l.svcCtx.MarketRpc.FindCoinInfo(ctx, marketReq)
+	})
 	if err != nil {
 		return nil, err
 	}
 
 	// 5. 查询用户钱包（基准币和交易币都查询）
-	walletReq := &wallet.WalletReq{
+	baseSymbolWalletResp, err := l.svcCtx.WalletRpc.FindWalletBySymbol(ctx, &wallet.WalletReq{
 		CoinName: exchangeCoinResp.GetBaseSymbol(),
 		UserId:   req.UserId,
-	}
-	baseSymbolWalletResp, err := l.svcCtx.WalletRpc.FindWalletBySymbol(ctx, walletReq)
+	})
 	if err != nil {
 		return nil, err
 	}
-	walletReq = &wallet.WalletReq{
+	coinSymbolWalletResp, err := l.svcCtx.WalletRpc.FindWalletBySymbol(ctx, &wallet.WalletReq{
 		CoinName: exchangeCoinResp.GetCoinSymbol(),
 		UserId:   req.UserId,
-	}
-	coinSymbolWalletResp, err := l.svcCtx.WalletRpc.FindWalletBySymbol(ctx, walletReq)
+	})
 	if err != nil {
 		return nil, err
 	}
+	// 钱包是否锁定 0 否 1 是
 	if baseSymbolWalletResp.IsLock == 1 || coinSymbolWalletResp.IsLock == 1 {
 		return nil, errors.New(fmt.Sprintf("%d wallet is locked", req.UserId))
 	}
@@ -222,8 +220,9 @@ func (l *OrderLogic) AddOrder(req *order.OrderReq) (*order.AddOrderResp, error) 
 		return nil, errors.New(fmt.Sprintf("exceeds the maximum order quantity %d", exchangeCoinResp.GetMaxTradingOrder()))
 	}
 
-	// 7. 保存订单到数据库，发送消息到kafka，ucenter钱包服务接收到消息，进行资金的冻结
+	// 7. 保存订单到数据库，发送消息到kafka，【ucenter钱包服务】 接收到消息，进行资金的冻结
 	// 如果消息发送失败，则整体回滚
+
 	// 生成订单
 	newOrder := model.NewOrder()
 	newOrder.UserId = req.UserId
@@ -245,7 +244,7 @@ func (l *OrderLogic) AddOrder(req *order.OrderReq) (*order.AddOrderResp, error) 
 
 	err = l.transaction.Action(func(conn zerodb.DbConn) error {
 		// 1. 提交订单
-		money, err := l.orderDomain.AddOrder(ctx, conn, newOrder, exchangeCoinResp, baseSymbolWalletResp, coinSymbolWalletResp)
+		money, err := l.orderDomain.AddOrder(ctx, conn, newOrder, baseSymbolWalletResp, coinSymbolWalletResp)
 		if err != nil {
 			return errors.New("order submission failed")
 		}
@@ -257,10 +256,9 @@ func (l *OrderLogic) AddOrder(req *order.OrderReq) (*order.AddOrderResp, error) 
 		return nil
 	})
 
-	resp := &order.AddOrderResp{
+	return &order.AddOrderResp{
 		OrderId: newOrder.OrderId,
-	}
-	return resp, nil
+	}, nil
 }
 
 func (l *OrderLogic) FindByOrderId(req *order.OrderReq) (*order.ExchangeOrder, error) {

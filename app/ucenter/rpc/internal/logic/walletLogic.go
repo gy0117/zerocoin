@@ -40,23 +40,20 @@ func NewWalletLogic(ctx context.Context, svcCtx *svc.ServiceContext) *WalletLogi
 }
 
 func (l *WalletLogic) FindWalletBySymbol(in *wallet.WalletReq) (*wallet.UserWallet, error) {
-	// 1. 根据coinName，在表coin中，找到coinId（market rpc服务中就有）
-	// 2. 根据coinId，在表member_wallet中，找到row
-	// 其实，可以直接根据coin_name，在表member_wallet中，找到row
-
-	ctx, cancel := context.WithTimeout(l.ctx, time.Second*10)
-	defer cancel()
-
-	marketReq := &market.MarketRequest{
+	ctx := context.Background()
+	// 1. 根据coinName，在表coin中，找到coin信息（market rpc服务中就有）
+	coinResp, err := l.svcCtx.MarketRpc.FindCoinInfo(ctx, &market.MarketRequest{
 		Unit: in.CoinName,
-	}
-	coinResp, err := l.svcCtx.MarketRpc.FindCoinInfo(ctx, marketReq)
+	})
+
 	if err != nil {
 		return nil, err
 	}
 	if coinResp == nil {
 		return nil, err
 	}
+
+	// 2. 根据coin_name，在表member_wallet中，找到row
 	memberWalletCoin, err := l.walletDomain.FindWallet(ctx, in.UserId, in.CoinName, coinResp)
 	if err != nil {
 		return nil, err
@@ -153,32 +150,28 @@ func (l *WalletLogic) findCoinByUnit(ctx context.Context, coinName string) (*mcl
 }
 
 func (l *WalletLogic) ResetWalletAddress(in *wallet.WalletReq) (*wallet.WalletResp, error) {
-
-	memberWallet, err := l.walletDomain.FindWalletByMemIdAndCoinName(l.ctx, in.UserId, in.CoinName)
-	fmt.Printf("memberWallet: %+v\n", memberWallet)
+	userWallet, err := l.walletDomain.FindWalletByMemIdAndCoinName(l.ctx, in.UserId, in.CoinName)
 	if err != nil {
 		return nil, err
 	}
 	if in.CoinName == "BTC" {
-
-		if memberWallet.Address == "" {
+		if userWallet.Address == "" {
 			// 生成地址
 			newWallet, err := btc.NewWallet()
 			if err != nil {
 				return nil, err
 			}
-			address := newWallet.GetTestAddress()
-			privateKey := newWallet.GetPrivateKey()
+			address := newWallet.GenerateBitcoinTestAddress()
+			privateKey := newWallet.GenerateBitcoinPrivateKey()
 
-			memberWallet.Address = string(address)
-			memberWallet.AddressPrivateKey = privateKey
+			userWallet.Address = string(address)
+			userWallet.AddressPrivateKey = privateKey[:50]
 
-			if err := l.walletDomain.UpdateWalletAddress(l.ctx, memberWallet); err != nil {
+			if err := l.walletDomain.UpdateWalletAddress(l.ctx, userWallet); err != nil {
 				return nil, err
 			}
 		}
 	}
-
 	return &wallet.WalletResp{}, nil
 }
 

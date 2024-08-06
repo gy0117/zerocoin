@@ -9,8 +9,8 @@ import (
 type LimitTradeOperate struct {
 	// 这两个顺序的规定，都是为了快速匹配进行买卖
 	// LimitPriceQueue，按照价格降序排列
-	buyLimitQueue  *queue.LimitPriceQueue // 买入限价队列，根据价格从高到低
-	sellLimitQueue *queue.LimitPriceQueue // 卖出限价队列，根据价格从低到高，这个在后面排序的时候，会处理的
+	buyLimitQueue  *queue.LimitPriceQueue // 以限价买入队列，根据价格从高到低
+	sellLimitQueue *queue.LimitPriceQueue // 以限价卖出队列，根据价格从低到高，这个在后面排序的时候，会处理的
 }
 
 func NewLimitTradeOperate() *LimitTradeOperate {
@@ -20,7 +20,10 @@ func NewLimitTradeOperate() *LimitTradeOperate {
 	}
 }
 
-// JoinInBuyLimitQueue 加入到限价买入订单队列，如果有相同价格，则加入到对应的LimitPriceMap中，否则新建一个LimitPriceMap，并将其加入到queue中
+// JoinInBuyLimitQueue
+// 将订单加入到 以限价买入队列
+// 如果存在相同价格，则加入到对应的LimitPriceMap中；否则新建一个LimitPriceMap，并将其加入到queue中
+// price - map
 func (ltOperate *LimitTradeOperate) JoinInBuyLimitQueue(o *model.ExchangeOrder) {
 	flag := false
 	// 遍历限价队列，根据当前订单的价格，找到对应的位置，并放入
@@ -40,7 +43,10 @@ func (ltOperate *LimitTradeOperate) JoinInBuyLimitQueue(o *model.ExchangeOrder) 
 	}
 }
 
-// JoinInSellLimitQueue 加入到限价卖出订单队列，如果有相同价格，则加入到对应的LimitPriceMap中，否则新建一个LimitPriceMap，并将其加入到queue中
+// JoinInSellLimitQueue
+// 将订单加入到 以限价卖出队列
+// 如果存在相同价格，则加入到对应的LimitPriceMap中；否则新建一个LimitPriceMap，并将其加入到queue中
+// price - map
 func (ltOperate *LimitTradeOperate) JoinInSellLimitQueue(o *model.ExchangeOrder) {
 	flag := false
 	// 遍历限价队列，根据当前订单的价格，找到对应的位置，并放入

@@ -34,7 +34,7 @@ func addMarketRouters(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				Method:  http.MethodPost,
 				Path:    "/market/symbol-thumb-trend",
-				Handler: market.CoinThumbTrend(serverCtx), // 获取币种行情
+				Handler: market.SymbolThumbTrendHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodPost,
@@ -44,7 +44,7 @@ func addMarketRouters(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				Method:  http.MethodPost,
 				Path:    "/market/symbol-info",
-				Handler: market.SymbolInfoHandler(serverCtx),  // 获取交易币详情
+				Handler: market.SymbolInfoHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodPost,

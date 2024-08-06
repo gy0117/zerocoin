@@ -7,10 +7,10 @@ type ExchangeReq struct {
 	PageNo   int64  `json:"pageNo,optional" form:"pageNo,optional"`
 	PageSize int64  `json:"pageSize,optional" form:"pageSize,optional"`
 	Price float64 `json:"price,optional" form:"price,optional"`
-	Amount float64 `json:"amount,optional" form:"amount,optional"`
-	Direction string `json:"direction,optional" form:"direction,optional"`
-	Type string `json:"type,optional" form:"type,optional"`
-	UseDiscount int `json:"useDiscount,optional" form:"useDiscount,optional"`
+	Amount float64 `json:"amount,optional" form:"amount,optional"`  // 买入或者卖出量
+	Direction string `json:"direction,optional" form:"direction,optional"`  // 订单方向 0 买 1 卖
+	Type string `json:"type,optional" form:"type,optional"`  // 挂单类型  0 市场价  1 最低价
+	UseDiscount int `json:"useDiscount,optional" form:"useDiscount,optional"`  // 是否使用折扣 0 不使用 1 使用
 }
 
 func (req *ExchangeReq) IsValid() bool {

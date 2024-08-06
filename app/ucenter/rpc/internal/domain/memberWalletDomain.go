@@ -27,12 +27,13 @@ func NewWalletDomain(db *zerodb.ZeroDB) *WalletDomain {
 
 // FindWallet 返回的是数据库model结构体
 func (d *WalletDomain) FindWallet(ctx context.Context, userId int64, coinName string, coin *market.Coin) (*model.UserWalletCoin, error) {
+	// 1. 找到userId用户拥有coinName的数据
 	walletData, err := d.walletRepo.FindByCoinName(ctx, userId, coinName)
 	if err != nil {
 		return nil, err
 	}
 	if walletData == nil {
-		// 保存
+		// 2. 如果不存在匹配的数据，则创建默认数据保存
 		memberWallet, memberWalletCoin := model.NewWalletData(userId, coin)
 		err = d.walletRepo.Save(ctx, memberWallet)
 		if err != nil {
@@ -58,6 +59,7 @@ func (d *WalletDomain) Freeze(ctx context.Context, userId int64, money float64, 
 	if wallet.Balance < money {
 		return errors.New("insufficient balance")
 	}
+	// 冻结：将对应的余额减掉，冻结余额增加即可
 	return d.walletRepo.Freeze(ctx, userId, money, symbol)
 }
 

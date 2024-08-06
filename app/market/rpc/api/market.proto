@@ -123,7 +123,7 @@ message CoinList {
 }
 
 service Market {
-  rpc FindCoinThumbTrend(MarketRequest) returns(CoinThumbResponse);
+  rpc FindSymbolThumbTrend(MarketRequest) returns(CoinThumbResponse);
   rpc FindSymbolInfo(MarketRequest) returns(ExchangeCoin);
   rpc FindCoinInfo(MarketRequest) returns(Coin);
   rpc GetHistoryKline(MarketRequest) returns(HistoryResp);

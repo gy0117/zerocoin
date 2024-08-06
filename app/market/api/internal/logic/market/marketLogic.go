@@ -2,7 +2,6 @@ package market
 
 import (
 	"context"
-	"fmt"
 	"github.com/jinzhu/copier"
 	"grpc-common/market/types/market"
 	"market-api/internal/svc"
@@ -26,8 +25,9 @@ func NewMarketLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MarketLogi
 	}
 }
 
-func (l *MarketLogic) CoinThumbTrend(req *types.MarketRequest) (resp []*types.CoinThumbResponse, err error) {
+func (l *MarketLogic) SymbolThumbTrend(req *types.MarketRequest) (resp []*types.CoinThumbResponse, err error) {
 	var thumbs []*market.CoinThumb
+	// 有缓存，先从缓存中拿，没有缓存，请求rpc
 	thumb := l.svcCtx.Processor.GetThumb()
 	isCache := false
 	if thumb != nil {
@@ -39,18 +39,24 @@ func (l *MarketLogic) CoinThumbTrend(req *types.MarketRequest) (resp []*types.Co
 	}
 
 	if !isCache {
-		ctx, cancelFunc := context.WithTimeout(l.ctx, time.Second*10)
-		defer cancelFunc()
+		ctx, cancel := context.WithTimeout(l.ctx, time.Second*10)
+		defer cancel()
 		// api和rpc模块中的Req参数是类似的
-		result, err := l.svcCtx.MarketRpc.FindCoinThumbTrend(ctx, &market.MarketRequest{
-			Ip: req.Ip,
+		result, err := l.svcCtx.MarketRpc.FindSymbolThumbTrend(ctx, &market.MarketRequest{
+			Ip:         req.Ip,
+			Symbol:     req.Symbol,
+			Unit:       req.Unit,
+			From:       req.From,
+			To:         req.To,
+			Resolution: req.Resolution,
 		})
 		if err != nil {
-			logx.Error("CoinThumbTrend err: ", err)
 			return nil, err
 		}
 		thumbs = result.List
 	}
+
+	// rpc数据转换为api数据
 	resp = make([]*types.CoinThumbResponse, len(thumbs))
 	for i, v := range thumbs {
 		resp[i] = &types.CoinThumbResponse{
@@ -120,7 +126,6 @@ func (l *MarketLogic) SymbolInfo(req *types.MarketRequest) (*types.ExchangeCoinR
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("SymbolInfo---result: %+v\n", result)
 	resp := &types.ExchangeCoinResp{}
 	if err = copier.Copy(resp, result); err != nil {
 		logx.Error(err)

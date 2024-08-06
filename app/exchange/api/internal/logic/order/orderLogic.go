@@ -5,7 +5,6 @@ import (
 	"exchange-api/internal/page"
 	"exchange-api/internal/svc"
 	"exchange-api/internal/types"
-	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
 	"grpc-common/exchange/types/order"
 	"time"
@@ -27,22 +26,21 @@ func NewOrderLogic(ctx context.Context, svcCtx *svc.ServiceContext) *OrderLogic 
 
 // GetHistoryOrders 分页
 func (l *OrderLogic) GetHistoryOrders(req *types.ExchangeReq) (*page.PageData, error) {
-	ctx, cancel := context.WithTimeout(l.ctx, time.Second*5)
+	ctx, cancel := context.WithTimeout(l.ctx, time.Second*10)
 	defer cancel()
 
 	// rpc调用
 	// 参数、返回值、方法
 	userId := ctx.Value("userId").(int64)
-	fmt.Println("Order | GetHistoryOrders | userId: ", userId)
 
-	in := &order.OrderReq{
+	orderResp, err := l.svcCtx.OrderRpc.GetHistoryOrder(ctx, &order.OrderReq{
 		Ip:       req.Ip,
 		Symbol:   req.Symbol,
 		Page:     req.PageNo,
 		PageSize: req.PageSize,
 		UserId:   userId,
-	}
-	orderResp, err := l.svcCtx.OrderRpc.GetHistoryOrder(ctx, in)
+	})
+
 	if err != nil {
 		return nil, err
 	}
@@ -56,22 +54,20 @@ func (l *OrderLogic) GetHistoryOrders(req *types.ExchangeReq) (*page.PageData, e
 }
 
 func (l *OrderLogic) GetCurrentOrders(req *types.ExchangeReq) (*page.PageData, error) {
-	ctx, cancel := context.WithTimeout(l.ctx, time.Second*5)
+	ctx, cancel := context.WithTimeout(l.ctx, time.Second*10)
 	defer cancel()
 
 	// rpc调用
 	// 参数、返回值、方法
 	userId := ctx.Value("userId").(int64)
-	fmt.Println("Order | GetCurrentOrders | userId: ", userId)
 
-	in := &order.OrderReq{
+	orderResp, err := l.svcCtx.OrderRpc.GetCurrentOrder(ctx, &order.OrderReq{
 		Ip:       req.Ip,
 		Symbol:   req.Symbol,
 		Page:     req.PageNo,
 		PageSize: req.PageSize,
 		UserId:   userId,
-	}
-	orderResp, err := l.svcCtx.OrderRpc.GetCurrentOrder(ctx, in)
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +86,8 @@ func (l *OrderLogic) AddOrder(req *types.ExchangeReq) (string, error) {
 
 	userId := ctx.Value("userId").(int64)
 
-	in := &order.OrderReq{
+	// rpc调用
+	orderResp, err := l.svcCtx.OrderRpc.AddOrder(ctx, &order.OrderReq{
 		Symbol:      req.Symbol,
 		Price:       req.Price,
 		Amount:      req.Amount,
@@ -98,10 +95,7 @@ func (l *OrderLogic) AddOrder(req *types.ExchangeReq) (string, error) {
 		Type:        req.Type,
 		UseDiscount: int32(req.UseDiscount),
 		UserId:      userId,
-	}
-
-	// rpc调用
-	orderResp, err := l.svcCtx.OrderRpc.AddOrder(ctx, in)
+	})
 	if err != nil {
 		return "", err
 	}

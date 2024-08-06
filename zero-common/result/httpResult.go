@@ -49,7 +49,9 @@ func HttpResult(ctx context.Context, w http.ResponseWriter, resp interface{}, er
 		code = ErrorCode
 		msg = err.Error()
 	} else {
-		result.Data = resp
+		if resp != nil {
+			result.Data = resp
+		}
 	}
 	result.Code = code
 	result.Message = msg

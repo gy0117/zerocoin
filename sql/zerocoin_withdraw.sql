@@ -19,6 +19,6 @@ CREATE TABLE `withdraw_record`
     `create_time`        bigint(0) NOT NULL COMMENT '创建时间',
     `deal_time`          bigint(0) NOT NULL COMMENT '处理时间',
     PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 SET FOREIGN_KEY_CHECKS = 1;

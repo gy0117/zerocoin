@@ -116,7 +116,7 @@ func (p *DefaultProcessor) GetThumb() any {
 }
 
 func (p *DefaultProcessor) initThumbMap(marketRpc mclient.Market) {
-	symbolThumbRes, err := marketRpc.FindCoinThumbTrend(context.Background(),
+	symbolThumbRes, err := marketRpc.FindSymbolThumbTrend(context.Background(),
 		&market.MarketRequest{})
 	if err != nil {
 		logx.Info(err)

@@ -26,6 +26,7 @@ func NewCoinTradeEngineFactory() *CoinTradeEngineFactory {
 
 // Init 读取exchange_coin表中的信息，symbol，一个symbol对应一个撮合交易引擎
 // 在exchange服务启动时，执行
+// 撮合交易引擎初始化
 func (f *CoinTradeEngineFactory) Init(marketRpc mclient.Market, cli *kafka.KafkaClient, db *zerodb.ZeroDB) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
@@ -36,8 +37,7 @@ func (f *CoinTradeEngineFactory) Init(marketRpc mclient.Market, cli *kafka.Kafka
 	}
 	if len(resp.List) > 0 {
 		for _, coin := range resp.List {
-			ct := NewCoinTrade(coin.Symbol, cli, db)
-			f.AddCoinTrade(coin.Symbol, ct)
+			f.AddCoinTrade(coin.Symbol, NewCoinTrade(coin.Symbol, cli, db))
 		}
 	}
 }
@@ -48,7 +48,7 @@ func (f *CoinTradeEngineFactory) AddCoinTrade(symbol string, coinTrade *CoinTrad
 	f.lock.RLock()
 	_, ok := f.coinTradeMap[symbol]
 	if ok {
-		logx.Info("Repeated addition of matching trading engines.")
+		logx.Info("[exchange-rpc] repeated addition of matching trading engines.")
 		return
 	}
 	f.lock.RUnlock()

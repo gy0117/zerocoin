@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"fmt"
 	"grpc-common/market/types/rate"
 	"market-rpc/internal/domain"
 	"market-rpc/internal/svc"
@@ -22,12 +21,11 @@ func NewExchangeRateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Exch
 		ctx:                ctx,
 		svcCtx:             svcCtx,
 		Logger:             logx.WithContext(ctx),
-		exchangeRateDomain: domain.NewExchangeRateDomain(svcCtx.DB),
+		exchangeRateDomain: domain.NewExchangeRateDomain(svcCtx.Cache),
 	}
 }
 
 func (l *ExchangeRateLogic) UsdRate(in *rate.RateRequest) (*rate.RateResponse, error) {
-	fmt.Println("[]>>>>>>market rpc 已经通过了...")
 	usdRate := l.exchangeRateDomain.UsdRate(in.Unit)
 	return &rate.RateResponse{
 		Rate: usdRate,

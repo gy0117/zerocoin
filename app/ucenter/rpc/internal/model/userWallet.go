@@ -4,16 +4,16 @@ import "grpc-common/market/types/market"
 
 type UserWallet struct {
 	Id                int64   `gorm:"column:id"`
-	Address           string  `gorm:"column:address"`
-	Balance           float64 `gorm:"column:balance"`
-	FrozenBalance     float64 `gorm:"column:frozen_balance"`
-	ReleaseBalance    float64 `gorm:"column:release_balance"`
-	IsLock            int     `gorm:"column:is_lock"`
+	Address           string  `gorm:"column:address"`         // 充值地址
+	Balance           float64 `gorm:"column:balance"`         // 可用余额
+	FrozenBalance     float64 `gorm:"column:frozen_balance"`  // 冻结余额
+	ReleaseBalance    float64 `gorm:"column:release_balance"` // 待释放余额
+	IsLock            int     `gorm:"column:is_lock"`         // 钱包是否锁定 0 否  1 是
 	UserId            int64   `gorm:"column:user_id"`
 	Version           int     `gorm:"column:version"`
-	CoinId            int64   `gorm:"column:coin_id"`
-	ToReleased        float64 `gorm:"column:to_released"`
-	CoinName          string  `gorm:"column:coin_name"`
+	CoinId            int64   `gorm:"column:coin_id"`     // 货币id
+	ToReleased        float64 `gorm:"column:to_released"` // 待释放总量
+	CoinName          string  `gorm:"column:coin_name"`   // 货币名称
 	AddressPrivateKey string  `gorm:"address_private_key"`
 }
 

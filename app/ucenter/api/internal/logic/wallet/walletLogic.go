@@ -26,18 +26,17 @@ func NewWalletLogic(ctx context.Context, svcCtx *svc.ServiceContext) *WalletLogi
 }
 
 func (l *WalletLogic) GetWalletInfo(req *types.WalletReq) (*types.UserWallet, error) {
-	ctx, cancelFunc := context.WithTimeout(l.ctx, time.Second*10)
-	defer cancelFunc()
+	ctx, cancel := context.WithTimeout(l.ctx, time.Second*10)
+	defer cancel()
 
 	// 这里的参数需要转换，api层和rpc层的对象不要用同一个
 	// rpc 调用
 	userId := ctx.Value("userId").(int64)
-	in := &wallet.WalletReq{
+	resp, err := l.svcCtx.UCWalletRpc.FindWalletBySymbol(ctx, &wallet.WalletReq{
 		CoinName: req.CoinName,
 		UserId:   userId,
-	}
+	})
 
-	resp, err := l.svcCtx.UCWalletRpc.FindWalletBySymbol(ctx, in)
 	if err != nil {
 		return nil, err
 	}

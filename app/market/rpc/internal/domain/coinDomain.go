@@ -25,7 +25,7 @@ func (d *CoinDomain) FindCoinInfo(ctx context.Context, unit string) (*model.Coin
 		return nil, err
 	}
 	if coin == nil {
-		return nil, errors.New("查询的货币不存在")
+		return nil, errors.New("the coin you are looking for does not exist")
 	}
 	return coin, nil
 }

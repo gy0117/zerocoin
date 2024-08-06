@@ -19,7 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Market_FindCoinThumbTrend_FullMethodName      = "/market.Market/FindCoinThumbTrend"
+	Market_FindSymbolThumbTrend_FullMethodName    = "/market.Market/FindSymbolThumbTrend"
 	Market_FindSymbolInfo_FullMethodName          = "/market.Market/FindSymbolInfo"
 	Market_FindCoinInfo_FullMethodName            = "/market.Market/FindCoinInfo"
 	Market_GetHistoryKline_FullMethodName         = "/market.Market/GetHistoryKline"
@@ -32,7 +32,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MarketClient interface {
-	FindCoinThumbTrend(ctx context.Context, in *MarketRequest, opts ...grpc.CallOption) (*CoinThumbResponse, error)
+	FindSymbolThumbTrend(ctx context.Context, in *MarketRequest, opts ...grpc.CallOption) (*CoinThumbResponse, error)
 	FindSymbolInfo(ctx context.Context, in *MarketRequest, opts ...grpc.CallOption) (*ExchangeCoin, error)
 	FindCoinInfo(ctx context.Context, in *MarketRequest, opts ...grpc.CallOption) (*Coin, error)
 	GetHistoryKline(ctx context.Context, in *MarketRequest, opts ...grpc.CallOption) (*HistoryResp, error)
@@ -49,9 +49,9 @@ func NewMarketClient(cc grpc.ClientConnInterface) MarketClient {
 	return &marketClient{cc}
 }
 
-func (c *marketClient) FindCoinThumbTrend(ctx context.Context, in *MarketRequest, opts ...grpc.CallOption) (*CoinThumbResponse, error) {
+func (c *marketClient) FindSymbolThumbTrend(ctx context.Context, in *MarketRequest, opts ...grpc.CallOption) (*CoinThumbResponse, error) {
 	out := new(CoinThumbResponse)
-	err := c.cc.Invoke(ctx, Market_FindCoinThumbTrend_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, Market_FindSymbolThumbTrend_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +116,7 @@ func (c *marketClient) FindCoinByCoinId(ctx context.Context, in *MarketRequest, 
 // All implementations must embed UnimplementedMarketServer
 // for forward compatibility
 type MarketServer interface {
-	FindCoinThumbTrend(context.Context, *MarketRequest) (*CoinThumbResponse, error)
+	FindSymbolThumbTrend(context.Context, *MarketRequest) (*CoinThumbResponse, error)
 	FindSymbolInfo(context.Context, *MarketRequest) (*ExchangeCoin, error)
 	FindCoinInfo(context.Context, *MarketRequest) (*Coin, error)
 	GetHistoryKline(context.Context, *MarketRequest) (*HistoryResp, error)
@@ -130,8 +130,8 @@ type MarketServer interface {
 type UnimplementedMarketServer struct {
 }
 
-func (UnimplementedMarketServer) FindCoinThumbTrend(context.Context, *MarketRequest) (*CoinThumbResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method FindCoinThumbTrend not implemented")
+func (UnimplementedMarketServer) FindSymbolThumbTrend(context.Context, *MarketRequest) (*CoinThumbResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FindSymbolThumbTrend not implemented")
 }
 func (UnimplementedMarketServer) FindSymbolInfo(context.Context, *MarketRequest) (*ExchangeCoin, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FindSymbolInfo not implemented")
@@ -164,20 +164,20 @@ func RegisterMarketServer(s grpc.ServiceRegistrar, srv MarketServer) {
 	s.RegisterService(&Market_ServiceDesc, srv)
 }
 
-func _Market_FindCoinThumbTrend_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Market_FindSymbolThumbTrend_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(MarketRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MarketServer).FindCoinThumbTrend(ctx, in)
+		return srv.(MarketServer).FindSymbolThumbTrend(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Market_FindCoinThumbTrend_FullMethodName,
+		FullMethod: Market_FindSymbolThumbTrend_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MarketServer).FindCoinThumbTrend(ctx, req.(*MarketRequest))
+		return srv.(MarketServer).FindSymbolThumbTrend(ctx, req.(*MarketRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -298,8 +298,8 @@ var Market_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*MarketServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "FindCoinThumbTrend",
-			Handler:    _Market_FindCoinThumbTrend_Handler,
+			MethodName: "FindSymbolThumbTrend",
+			Handler:    _Market_FindSymbolThumbTrend_Handler,
 		},
 		{
 			MethodName: "FindSymbolInfo",

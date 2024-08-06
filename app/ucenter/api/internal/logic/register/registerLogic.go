@@ -36,19 +36,20 @@ func (l *RegisterLogic) Register(req *types.Request) (*types.RegisterResp, error
 	if err := copier.Copy(registerReq, req); err != nil {
 		return nil, err
 	}
-	logx.Infof("registerReq: %+v", registerReq)
+	//logx.Infof("registerReq: %+v", registerReq)
 
-	registerResp, err := l.svcCtx.UCRegisterRpc.RegisterByPhone(ctx, registerReq)
+	_, err := l.svcCtx.UCRegisterRpc.RegisterByPhone(ctx, registerReq)
 	if err != nil {
 		return nil, err
 	}
 
-	var resp types.RegisterResp
-	if err = copier.Copy(&resp, registerResp); err != nil {
-		return nil, err
-	}
-
-	return &resp, nil
+	//var resp types.RegisterResp
+	//if err = copier.Copy(&resp, registerResp); err != nil {
+	//	return nil, err
+	//}
+	//
+	//return &resp, nil
+	return nil, nil
 }
 
 func (l *RegisterLogic) SendCode(req *types.CodeReq) (resp *types.CodeResp, err error) {

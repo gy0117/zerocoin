@@ -2,7 +2,6 @@ package exchange_rate
 
 import (
 	"context"
-	"fmt"
 	"grpc-common/market/types/rate"
 	"market-api/internal/svc"
 	"market-api/internal/types"
@@ -39,7 +38,6 @@ func (l *ExchangeRateLogic) UsdRate(req *types.RateRequest) (resp *types.RateRes
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("[]>>>>>>market-api result.Rate: ", result.Rate)
 	return &types.RateResponse{
 		Rate: result.Rate,
 	}, nil
