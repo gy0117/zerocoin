@@ -2,6 +2,7 @@ package exchange_rate
 
 import (
 	"context"
+	"github.com/pkg/errors"
 	"grpc-common/market/types/rate"
 	"market-api/internal/svc"
 	"market-api/internal/types"
@@ -25,8 +26,8 @@ func NewExchangeRateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Exch
 }
 
 func (l *ExchangeRateLogic) UsdRate(req *types.RateRequest) (resp *types.RateResponse, err error) {
-	ctx, cancelFunc := context.WithTimeout(l.ctx, time.Second*10)
-	defer cancelFunc()
+	ctx, cancel := context.WithTimeout(l.ctx, time.Second*10)
+	defer cancel()
 
 	// api和rpc模块中的Req参数是类似的
 	rateReq := &rate.RateRequest{
@@ -36,7 +37,7 @@ func (l *ExchangeRateLogic) UsdRate(req *types.RateRequest) (resp *types.RateRes
 
 	result, err := l.svcCtx.ExchangeRateRpc.UsdRate(ctx, rateReq)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "req: %+v", req)
 	}
 	return &types.RateResponse{
 		Rate: result.Rate,

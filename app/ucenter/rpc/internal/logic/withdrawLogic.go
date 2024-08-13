@@ -3,9 +3,9 @@ package logic
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/jinzhu/copier"
+	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/logx"
 	"grpc-common/market/types/market"
 	"grpc-common/ucenter/types/withdraw"
@@ -18,7 +18,11 @@ import (
 	"zero-common/tools"
 	"zero-common/zerodb"
 	"zero-common/zerodb/tran"
+	"zero-common/zerr"
 )
+
+var ErrWithdraw = zerr.NewCodeErr(zerr.WITHDRAW_ERROR)
+var ErrFindWithdrawRecord = zerr.NewCodeErr(zerr.WITHDRAW_FIND_RECORD)
 
 const withdrawVerifyCode = "WITHDRAW::VERIFY::"
 const topicBtcWithdraw = "btc_withdraw"
@@ -53,7 +57,7 @@ func (l *WithdrawLogic) FindAddressesByCoinId(in *withdraw.WithdrawRequest) (*wi
 
 	addresses, err := l.mAddressDomain.FindAddressesByCoinId(ctx, in.UserId, in.CoinId)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(ErrGetAddress, "获取地址失败, uid: %d, coin: %d, err: %v", in.UserId, in.CoinId, err)
 	}
 
 	list := make([]*withdraw.AddressSimple, len(addresses))
@@ -98,7 +102,7 @@ func (l *WithdrawLogic) SendCode(in *withdraw.SendCodeReq) (*withdraw.EmptyResp,
 func (l *WithdrawLogic) Withdraw(in *withdraw.WithdrawRequest) (*withdraw.EmptyResp, error) {
 	member, err := l.userDomain.FindUserById(l.ctx, in.UserId)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(ErrFindUser, "查找用户失败, uid: %d, err: %v", in.UserId, err)
 	}
 	var codeStr string
 	key := withdrawVerifyCode + member.MobilePhone
@@ -108,28 +112,28 @@ func (l *WithdrawLogic) Withdraw(in *withdraw.WithdrawRequest) (*withdraw.EmptyR
 	}
 	if in.Code != codeStr {
 		// 验证码输入有误
-		return nil, errors.New("验证码输入错误")
+		return nil, errors.Wrapf(ErrWithdraw, "验证码输入错误, uid: %d, err: %v", in.UserId, err)
 	}
 
 	if in.JyPassword != member.JyPassword {
 		// 交易密码错误
-		return nil, errors.New("交易密码输入错误")
+		return nil, errors.Wrapf(ErrWithdraw, "交易密码输入错误, uid: %d", in.UserId)
 	}
 
 	memberWallet, err := l.memberWalletDomain.FindWalletByMemIdAndCoinName(l.ctx, in.UserId, in.Unit)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(ErrFindWallet, "查找钱包失败, uid: %d, err: %v", in.UserId, err)
 	}
 	if memberWallet.Balance < in.Amount {
 		// 如果钱包中的余额（这里的余额就是coinName对应的数量）
-		return nil, errors.New("余额不足")
+		return nil, errors.Wrapf(ErrWithdraw, "余额不足, uid: %d, balance: %f", in.UserId, memberWallet.Balance)
 	}
 
 	// 下面是一个事务
 	err = l.transaction.Action(func(conn zerodb.DbConn) error {
 		// 冻结
 		if err := l.memberWalletDomain.FreezeWithConn(l.ctx, conn, in.UserId, in.Amount, in.Unit); err != nil {
-			return err
+			return errors.Wrapf(ErrWithdraw, "冻结钱包失败, uid: %d, amount: %f, unit: %s, err: %v", in.UserId, in.Amount, in.Unit, err)
 		}
 
 		// 保存记录
@@ -150,14 +154,12 @@ func (l *WithdrawLogic) Withdraw(in *withdraw.WithdrawRequest) (*withdraw.EmptyR
 		record.TransactionNumber = "" //目前还没有交易编号
 
 		if err := l.withdrawDomain.SaveRecord(l.ctx, conn, record); err != nil {
-			return err
+			return errors.Wrapf(ErrWithdraw, "保存提现记录失败, uid: %d, err: %v", in.UserId, err)
 		}
 
 		// 发送MQ
-		marshal, err := json.Marshal(record)
-		if err != nil {
-			return err
-		}
+		marshal, _ := json.Marshal(record)
+
 		data := kafka.KafkaData{
 			Topic: topicBtcWithdraw,
 			Key:   []byte(fmt.Sprintf("%d", in.UserId)),
@@ -172,7 +174,7 @@ func (l *WithdrawLogic) Withdraw(in *withdraw.WithdrawRequest) (*withdraw.EmptyR
 			break
 		}
 		if err != nil {
-			return err
+			return errors.Wrapf(ErrWithdraw, "发送kafka失败, uid: %d, err: %v", in.UserId, err)
 		}
 		return nil
 	})
@@ -185,7 +187,7 @@ func (l *WithdrawLogic) Withdraw(in *withdraw.WithdrawRequest) (*withdraw.EmptyR
 func (l *WithdrawLogic) WithdrawRecord(req *withdraw.WithdrawRequest) (*withdraw.RecordList, error) {
 	list, total, err := l.withdrawDomain.WithdrawRecord(l.ctx, req.UserId, req.Page, req.PageSize)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(ErrFindWithdrawRecord, "查询提现记录失败, uid: %d, err: %v", req.UserId, err)
 	}
 
 	voList := make([]*model.WithdrawRecordVo, len(list))
@@ -194,16 +196,13 @@ func (l *WithdrawLogic) WithdrawRecord(req *withdraw.WithdrawRequest) (*withdraw
 			CoinId: v.CoinId,
 		})
 		if err != nil {
-			return nil, err
+			continue
 		}
 		voList[i] = v.ToVo(coin)
 	}
 
 	var res []*withdraw.WithdrawRecord
-	err = copier.Copy(&res, voList)
-	if err != nil {
-		return nil, err
-	}
+	_ = copier.Copy(&res, voList)
 	return &withdraw.RecordList{
 		List:  res,
 		Total: total,

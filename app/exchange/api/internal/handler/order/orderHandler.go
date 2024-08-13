@@ -17,13 +17,13 @@ func GetHistoryOrders(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.ExchangeReq
 		if err := httpx.ParseForm(r, &req); err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
+			result.ParamErrorResult(w, r, err)
 			return
 		}
 		req.Ip = tools.GetRemoteClientIp(r)
 		l := order.NewOrderLogic(r.Context(), svcCtx)
 		resp, err := l.GetHistoryOrders(&req)
-		result.HttpResult(r.Context(), w, resp, err)
+		result.HttpResult2(w, r, resp, err)
 	}
 }
 
@@ -32,13 +32,13 @@ func GetCurrentOrders(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.ExchangeReq
 		if err := httpx.ParseForm(r, &req); err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
+			result.ParamErrorResult(w, r, err)
 			return
 		}
 		req.Ip = tools.GetRemoteClientIp(r)
 		l := order.NewOrderLogic(r.Context(), svcCtx)
 		resp, err := l.GetCurrentOrders(&req)
-		result.HttpResult(r.Context(), w, resp, err)
+		result.HttpResult2(w, r, resp, err)
 	}
 }
 
@@ -47,16 +47,16 @@ func AddOrder(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.ExchangeReq
 		if err := httpx.ParseForm(r, &req); err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
+			result.ParamErrorResult(w, r, err)
 			return
 		}
 		if !req.IsValid() {
-			httpx.ErrorCtx(r.Context(), w, errors.New("订单参数错误"))
+			result.ParamErrorResult(w, r, errors.New("订单参数错误"))
 			return
 		}
 		req.Ip = tools.GetRemoteClientIp(r)
 		l := order.NewOrderLogic(r.Context(), svcCtx)
 		orderId, err := l.AddOrder(&req)
-		result.HttpResult(r.Context(), w, orderId, err)
+		result.HttpResult2(w, r, orderId, err)
 	}
 }

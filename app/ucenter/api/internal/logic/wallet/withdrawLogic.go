@@ -1,8 +1,9 @@
-package withdraw
+package wallet
 
 import (
 	"context"
 	"github.com/jinzhu/copier"
+	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/logx"
 	"grpc-common/ucenter/types/user"
 	"grpc-common/ucenter/types/wallet"
@@ -49,8 +50,7 @@ func (l *WithdrawLogic) GetSupportedCoinInfo() ([]*types.WithdrawWalletInfo, err
 		UserId: userId,
 	})
 	if err != nil {
-		logx.Error(err)
-		return nil, err
+		return nil, errors.Wrapf(err, "uid: %d", userId)
 	}
 	// 3. 组装数据[]*types.WithdrawWalletInfo
 	list := make([]*types.WithdrawWalletInfo, len(memberWallets.List))
@@ -82,15 +82,11 @@ func (l *WithdrawLogic) GetSupportedCoinInfo() ([]*types.WithdrawWalletInfo, err
 			UserId: userId,
 		})
 		if err != nil {
-			logx.Error(err)
-			return nil, err
+			return nil, errors.Wrapf(err, "uid: %d, coinId: %d", userId, coin.Id)
 		}
 		var as []types.AddressSimple
-		err = copier.Copy(&as, simpleList.List)
-		if err != nil {
-			logx.Error(err)
-			return nil, err
-		}
+		_ = copier.Copy(&as, simpleList.List)
+
 		item.Addresses = as
 
 		list[i] = item
@@ -112,16 +108,14 @@ func (l *WithdrawLogic) SendCode() error {
 		UserId: userId,
 	})
 	if err != nil {
-		logx.Error(err)
-		return err
+		return errors.Wrapf(err, "uid: %d", userId)
 	}
 	phone := memberResp.MobilePhone
 	_, err = l.svcCtx.UCWithdrawRpc.SendCode(ctx, &withdraw.SendCodeReq{
 		Phone: phone,
 	})
 	if err != nil {
-		logx.Error(err)
-		return err
+		return errors.Wrapf(err, "uid: %d, phone: %s", userId, phone)
 	}
 	return nil
 }
@@ -142,8 +136,7 @@ func (l *WithdrawLogic) Withdraw(in *types.WithdrawReq) error {
 	}
 	_, err := l.svcCtx.UCWithdrawRpc.Withdraw(ctx, req)
 	if err != nil {
-		logx.Error(err)
-		return err
+		return errors.Wrapf(err, "req: %+v", req)
 	}
 	return nil
 }
@@ -159,7 +152,7 @@ func (l *WithdrawLogic) Record(req *types.WithdrawReq) (*pages.PageResult, error
 		PageSize: req.PageSize,
 	})
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "uid: %d", userId)
 	}
 
 	list := make([]any, len(record.List))

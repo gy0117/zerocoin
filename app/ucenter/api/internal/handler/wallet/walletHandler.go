@@ -9,53 +9,55 @@ import (
 	"zero-common/result"
 )
 
-// WalletHandler 获取用户钱包信息
-func WalletHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+// 获取用户钱包信息
+func GetWalletWithCoin(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.WalletReq
 		if err := httpx.ParsePath(r, &req); err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
+			result.ParamErrorResult(w, r, err)
 			return
 		}
 
 		l := wallet.NewWalletLogic(r.Context(), svcCtx)
 		resp, err := l.GetWalletInfo(&req)
-		result.HttpResult(r.Context(), w, resp, err)
+		result.HttpResult2(w, r, resp, err)
 	}
 }
 
-// FindWallet 返回用户钱包信息
-func FindWallet(svcCtx *svc.ServiceContext) http.HandlerFunc {
+// 返回用户钱包信息
+func GetWallet(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		l := wallet.NewWalletLogic(r.Context(), svcCtx)
 		resp, err := l.FindWallet()
-		result.HttpResult(r.Context(), w, resp, err)
+		result.HttpResult2(w, r, resp, err)
 	}
 }
 
+// 重置钱包地址
 func ResetWalletAddress(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.WalletReq
 		if err := httpx.ParseForm(r, &req); err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
+			result.ParamErrorResult(w, r, err)
 			return
 		}
 
 		l := wallet.NewWalletLogic(r.Context(), svcCtx)
 		resp, err := l.ResetWalletAddress(&req)
-		result.HttpResult(r.Context(), w, resp, err)
+		result.HttpResult2(w, r, resp, err)
 	}
 }
 
+// 获取所有交易
 func GetAllTransactions(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.TransactionReq
 		if err := httpx.ParseForm(r, &req); err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
+			result.ParamErrorResult(w, r, err)
 			return
 		}
 		l := wallet.NewWalletLogic(r.Context(), svcCtx)
 		resp, err := l.GetAllTransactions(&req)
-		result.HttpResult(r.Context(), w, resp, err)
+		result.HttpResult2(w, r, resp, err)
 	}
 }

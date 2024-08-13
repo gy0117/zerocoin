@@ -2,7 +2,8 @@ package logic
 
 import (
 	"context"
-	"errors"
+	"github.com/pkg/errors"
+
 	"github.com/golang-jwt/jwt/v4"
 	"grpc-common/ucenter/types/login"
 	"time"
@@ -10,9 +11,15 @@ import (
 	"ucenter-rpc/internal/svc"
 	"ucenter-rpc/internal/verify"
 	"zero-common/tools"
+	"zero-common/zerr"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
+
+var ErrUserLogin = zerr.NewCodeErr(zerr.USER_LOGIN_ERROR)
+var ErrPhoneNotExist = zerr.NewCodeErr(zerr.USER_PHONE_NOT_EXIST_ERROR)
+var ErrPassword = zerr.NewCodeErr(zerr.USER_PASSWORD_ERROR)
+var ErrGenerateToken = zerr.NewCodeErr(zerr.TOKEN_GENERATE_ERROR)
 
 type LoginLogic struct {
 	ctx    context.Context
@@ -63,24 +70,21 @@ func (l *LoginLogic) Login(in *login.LoginReq) (*login.LoginResp, error) {
 	// in.Username是手机号
 	user, err := l.userDomain.FindByPhone(l.ctx, in.Username)
 	if err != nil {
-		logx.Error(err)
-		return nil, errors.New("failed to login")
+		return nil, errors.Wrapf(ErrUserLogin, "查询手机号失败 phone: %s, err: %v", in.Username, err)
 	}
 	if user == nil {
-		return nil, errors.New("user not register")
+		return nil, errors.Wrapf(ErrPhoneNotExist, "手机号不存在 phone: %s", in.Username)
 	}
 	if ok := tools.Verify(in.Password, user.Salt, user.Password, nil); !ok {
-		return nil, errors.New("password not be correct")
+		return nil, errors.Wrapf(ErrPassword, "密码错误 phone: %s", in.Username)
 	}
 
 	// 3. 登录成功，将jwt token返回给前端
 	//token, err := l.generateToken(user.Id, user.Username)
 	token, err := l.getJwtToken(l.svcCtx.Config.Jwt.AccessSecret, time.Now().Unix(), l.svcCtx.Config.Jwt.AccessExpire, user.Id)
 	if err != nil {
-		logx.Error(err)
-		return nil, errors.New("failed to login: generate token error")
+		return nil, errors.Wrapf(ErrGenerateToken, "token生成失败 phone: %s, err: %v", in.Username, err)
 	}
-	logx.Info("generate token: " + token)
 
 	return &login.LoginResp{
 		Token:         token,

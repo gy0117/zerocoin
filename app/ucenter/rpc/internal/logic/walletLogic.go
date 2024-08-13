@@ -2,8 +2,8 @@ package logic
 
 import (
 	"context"
-	"fmt"
 	"github.com/jinzhu/copier"
+	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/logx"
 	"grpc-common/market/mclient"
 	"grpc-common/market/types/market"
@@ -15,7 +15,13 @@ import (
 	"zero-common/btc"
 	"zero-common/operate"
 	"zero-common/tools"
+	"zero-common/zerr"
 )
+
+var ErrFindWallet = zerr.NewCodeErr(zerr.FIND_WALLET_ERROR)
+var ErrResetWalletAddress = zerr.NewCodeErr(zerr.RESET_WALLET_ADDRESS_ERROR)
+var ErrGetTransactions = zerr.NewCodeErr(zerr.GET_TRANSACTIONS_ERROR)
+var ErrGetAddress = zerr.NewCodeErr(zerr.GET_ADDRESS_ERROR)
 
 type WalletLogic struct {
 	ctx    context.Context
@@ -47,32 +53,30 @@ func (l *WalletLogic) FindWalletBySymbol(in *wallet.WalletReq) (*wallet.UserWall
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(ErrFindWallet, "查找coin表失败，coin: %s, err: %v", in.CoinName, err)
 	}
 	if coinResp == nil {
-		return nil, err
+		return nil, errors.Wrapf(ErrFindWallet, "查找coin表失败，数据为空，coin: %s", in.CoinName)
 	}
 
-	// 2. 根据coin_name，在表member_wallet中，找到row
+	// 2. 根据coin_name，在表user_wallet中，找到row
 	memberWalletCoin, err := l.walletDomain.FindWallet(ctx, in.UserId, in.CoinName, coinResp)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(ErrFindWallet, "查找user_wallet表失败，coin: %s, err: %v", in.CoinName, err)
 	}
 	resp := &wallet.UserWallet{}
-	if err = copier.Copy(resp, memberWalletCoin); err != nil {
-		return nil, err
-	}
+	_ = copier.Copy(resp, memberWalletCoin)
 	return resp, nil
 }
 
 func (l *WalletLogic) FindWallet(in *wallet.WalletReq) (*wallet.FindWalletResp, error) {
-	// 从member_wallet中找到对应userId的钱包信息
+	// 从user_wallet中找到对应userId的钱包信息
 	ctx, cancel := context.WithTimeout(l.ctx, time.Second*10)
 	defer cancel()
 
 	memberWallets, err := l.walletDomain.FindWalletsByUserId(ctx, in.UserId)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(ErrFindWallet, "查找user_wallet表失败，uid: %s, err: %v", in.UserId, err)
 	}
 
 	// 从redis中获取汇率
@@ -87,11 +91,7 @@ func (l *WalletLogic) FindWallet(in *wallet.WalletReq) (*wallet.FindWalletResp, 
 	index := 0
 	for _, v := range memberWallets {
 		mwc := &wallet.UserWallet{}
-		err = copier.Copy(mwc, v)
-		if err != nil {
-			logx.Error(err)
-			continue
-		}
+		_ = copier.Copy(mwc, v)
 
 		coinResp, err := l.findCoinByUnit(ctx, v.CoinName)
 		if err != nil {
@@ -101,13 +101,7 @@ func (l *WalletLogic) FindWallet(in *wallet.WalletReq) (*wallet.FindWalletResp, 
 			continue
 		}
 		walletCoin := &wallet.Coin{}
-		err = copier.Copy(walletCoin, coinResp)
-		if err != nil {
-			logx.Error(err)
-			list[index] = mwc
-			index++
-			continue
-		}
+		_ = copier.Copy(walletCoin, coinResp)
 		mwc.Coin = walletCoin
 
 		if v.CoinName == "USDT" {
@@ -125,7 +119,7 @@ func (l *WalletLogic) FindWallet(in *wallet.WalletReq) (*wallet.FindWalletResp, 
 			mwc.Coin.CnyRate = operate.MulFloor(cnyRate, rate, 8)
 		}
 
-		fmt.Printf("%s | UsdRate: %f, CnyRate: %f\n", v.CoinName, mwc.Coin.UsdRate, mwc.Coin.CnyRate)
+		logx.Info("%s | UsdRate: %f, CnyRate: %f\n", v.CoinName, mwc.Coin.UsdRate, mwc.Coin.CnyRate)
 
 		list[index] = mwc
 		index++
@@ -152,14 +146,14 @@ func (l *WalletLogic) findCoinByUnit(ctx context.Context, coinName string) (*mcl
 func (l *WalletLogic) ResetWalletAddress(in *wallet.WalletReq) (*wallet.WalletResp, error) {
 	userWallet, err := l.walletDomain.FindWalletByMemIdAndCoinName(l.ctx, in.UserId, in.CoinName)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(ErrFindWallet, "查找用户失败，uid: %s, coin: %s, err: %v", in.UserId, in.CoinName, err)
 	}
 	if in.CoinName == "BTC" {
 		if userWallet.Address == "" {
 			// 生成地址
 			newWallet, err := btc.NewWallet()
 			if err != nil {
-				return nil, err
+				return nil, errors.Wrapf(ErrResetWalletAddress, "重置钱包地址失败，uid: %d, coin: %s, err: %v", in.UserId, in.CoinName, err)
 			}
 			address := newWallet.GenerateBitcoinTestAddress()
 			privateKey := newWallet.GenerateBitcoinPrivateKey()
@@ -168,7 +162,7 @@ func (l *WalletLogic) ResetWalletAddress(in *wallet.WalletReq) (*wallet.WalletRe
 			userWallet.AddressPrivateKey = privateKey[:50]
 
 			if err := l.walletDomain.UpdateWalletAddress(l.ctx, userWallet); err != nil {
-				return nil, err
+				return nil, errors.Wrapf(ErrResetWalletAddress, "更新钱包地址失败 uid: %d, coin: %s, err: %v", in.UserId, in.CoinName, err)
 			}
 		}
 	}
@@ -178,15 +172,12 @@ func (l *WalletLogic) ResetWalletAddress(in *wallet.WalletReq) (*wallet.WalletRe
 func (l *WalletLogic) GetAllTransactions(in *wallet.AssetReq) (*wallet.UserTransactionListResp, error) {
 	transactionVos, total, err := l.mtDomain.GetTransactions(l.ctx, in.PageNo, in.PageSize, in.UserId, in.Symbol, in.StartTime, in.EndTime, in.Type)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(ErrGetTransactions, "获取交易记录失败, uid: %d, err: %v", in.UserId, err)
 	}
 
 	// rpc对象
 	var list []*wallet.UserTransaction
-	if err := copier.Copy(&list, transactionVos); err != nil {
-		return nil, err
-	}
-
+	_ = copier.Copy(&list, transactionVos)
 	resp := &wallet.UserTransactionListResp{
 		List:  list,
 		Total: total,
@@ -197,7 +188,7 @@ func (l *WalletLogic) GetAllTransactions(in *wallet.AssetReq) (*wallet.UserTrans
 func (l *WalletLogic) GetAddress(in *wallet.AssetReq) (*wallet.AddressListResp, error) {
 	address, err := l.walletDomain.GetAddress(l.ctx, in.CoinName)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(ErrGetAddress, "获取地址失败, uid: %d, err: %v", in.UserId, err)
 	}
 	return &wallet.AddressListResp{
 		List: address,

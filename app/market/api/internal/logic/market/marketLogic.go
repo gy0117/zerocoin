@@ -3,6 +3,7 @@ package market
 import (
 	"context"
 	"github.com/jinzhu/copier"
+	"github.com/pkg/errors"
 	"grpc-common/market/types/market"
 	"market-api/internal/svc"
 	"market-api/internal/types"
@@ -51,7 +52,7 @@ func (l *MarketLogic) SymbolThumbTrend(req *types.MarketRequest) (resp []*types.
 			Resolution: req.Resolution,
 		})
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrapf(err, "market-api findSymbolThumbTrend error")
 		}
 		thumbs = result.List
 	}
@@ -124,13 +125,10 @@ func (l *MarketLogic) SymbolInfo(req *types.MarketRequest) (*types.ExchangeCoinR
 
 	result, err := l.svcCtx.MarketRpc.FindSymbolInfo(ctx, marketReq)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "market-api symbolInfo, symbol: %s", req.Symbol)
 	}
 	resp := &types.ExchangeCoinResp{}
-	if err = copier.Copy(resp, result); err != nil {
-		logx.Error(err)
-		return nil, err
-	}
+	_ = copier.Copy(resp, result)
 	return resp, nil
 }
 
@@ -145,14 +143,10 @@ func (l *MarketLogic) CoinInfo(req *types.MarketRequest) (*types.Coin, error) {
 	}
 	coin, err := l.svcCtx.MarketRpc.FindCoinInfo(ctx, in)
 	if err != nil {
-		logx.Error(err)
-		return nil, err
+		return nil, errors.Wrapf(err, "market-api coinInfo, unit: %s", req.Unit)
 	}
 	resp := &types.Coin{}
-	if err = copier.Copy(resp, coin); err != nil {
-		logx.Error(err)
-		return nil, err
-	}
+	_ = copier.Copy(resp, coin)
 	return resp, nil
 }
 
@@ -170,8 +164,7 @@ func (l *MarketLogic) GetHistoryKline(req *types.MarketRequest) (*types.HistoryK
 	}
 	kline, err := l.svcCtx.MarketRpc.GetHistoryKline(ctx, in)
 	if err != nil {
-		logx.Error(err)
-		return nil, err
+		return nil, errors.Wrapf(err, "market-api req: %+v", req)
 	}
 	resp := make([][]any, len(kline.List))
 	for i, v := range kline.List {

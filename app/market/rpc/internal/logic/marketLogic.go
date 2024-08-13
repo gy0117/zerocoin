@@ -3,13 +3,18 @@ package logic
 import (
 	"context"
 	"github.com/jinzhu/copier"
+	"github.com/pkg/errors"
+	"github.com/zeromicro/go-zero/core/logx"
 	"grpc-common/market/types/market"
 	"market-rpc/internal/domain"
 	"market-rpc/internal/svc"
 	"time"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	"zero-common/zerr"
 )
+
+var ErrMarketFindSymbol = zerr.NewCodeErr(zerr.MARKET_FIND_SYMBOL_ERROR)
+var ErrMarketFindCoin = zerr.NewCodeErr(zerr.MARKET_FIND_COIN_ERROR)
+var ErrMarketHistoryKline = zerr.NewCodeErr(zerr.MARKET_FIND_COIN_ERROR)
 
 type MarketLogic struct {
 	ctx    context.Context
@@ -51,7 +56,7 @@ func (l *MarketLogic) FindSymbolInfo(in *market.MarketRequest) (*market.Exchange
 	symbol := in.GetSymbol()
 	coin, err := l.exchangeCoinDomain.FindBySymbol(ctx, symbol)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(ErrMarketFindSymbol, "market find symbol: %s", symbol)
 	}
 
 	resp := &market.ExchangeCoin{
@@ -85,25 +90,17 @@ func (l *MarketLogic) FindSymbolInfo(in *market.MarketRequest) (*market.Exchange
 		Zone:             coin.Zone,
 		CoinSymbol:       coin.CoinSymbol,
 	}
-	//if err = copier.Copy(resp, exchangeCoin); err != nil {
-	//	return nil, err
-	//}
 	return resp, nil
 }
 
-// FindCoinInfo server中调用
 func (l *MarketLogic) FindCoinInfo(in *market.MarketRequest) (*market.Coin, error) {
-	ctx := context.Background()
-	coin, err := l.coinDomain.FindCoinInfo(ctx, in.Unit)
+	coin, err := l.coinDomain.FindCoinInfo(l.ctx, in.Unit)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(ErrMarketFindCoin, "market find coin: %s", in.Unit)
 	}
 	resp := &market.Coin{}
-	if err = copier.Copy(resp, coin); err != nil {
-		logx.Error(err)
-		return nil, err
-	}
+	_ = copier.Copy(resp, coin)
 	return resp, nil
 }
 
@@ -131,7 +128,7 @@ func (l *MarketLogic) GetHistoryKline(in *market.MarketRequest) (*market.History
 
 	histories, err := l.marketDomain.GetHistoryKline(ctx, in.GetSymbol(), in.GetFrom(), in.GetTo(), in.GetResolution(), period)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(ErrMarketHistoryKline, "market getHistoryKline, symbol: %s, from: %d, to: %d, period: %s", in.GetSymbol(), in.GetFrom(), in.GetTo(), period)
 	}
 
 	return &market.HistoryResp{
@@ -146,9 +143,7 @@ func (l *MarketLogic) FindExchangeCoinVisible(in *market.MarketRequest) (*market
 
 	var list []*market.ExchangeCoin
 
-	if err := copier.Copy(&list, coins); err != nil {
-		return nil, err
-	}
+	_ = copier.Copy(&list, coins)
 	return &market.ExchangeCoinResp{
 		List: list,
 	}, nil
@@ -160,12 +155,9 @@ func (l *MarketLogic) FindCoinByCoinId(in *market.MarketRequest) (*market.Coin, 
 
 	coin, err := l.coinDomain.FindCoinByCoinId(ctx, in.CoinId)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(ErrMarketFindCoin, "market findCoinByCoinId, coindId: %d", in.CoinId)
 	}
 	resp := &market.Coin{}
-	if err = copier.Copy(resp, coin); err != nil {
-		logx.Error(err)
-		return nil, err
-	}
+	_ = copier.Copy(resp, coin)
 	return resp, nil
 }

@@ -5,6 +5,7 @@ import (
 	"exchange-api/internal/page"
 	"exchange-api/internal/svc"
 	"exchange-api/internal/types"
+	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/logx"
 	"grpc-common/exchange/types/order"
 	"time"
@@ -42,7 +43,7 @@ func (l *OrderLogic) GetHistoryOrders(req *types.ExchangeReq) (*page.PageData, e
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "exchange-api GetHistoryOrders, uid: %d, req: %+v", userId, req)
 	}
 
 	b := make([]any, len(orderResp.List))
@@ -69,7 +70,7 @@ func (l *OrderLogic) GetCurrentOrders(req *types.ExchangeReq) (*page.PageData, e
 		UserId:   userId,
 	})
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "exchange-api GetCurrentOrders, uid: %d, req: %+v", userId, req)
 	}
 
 	b := make([]any, len(orderResp.List))
@@ -97,7 +98,7 @@ func (l *OrderLogic) AddOrder(req *types.ExchangeReq) (string, error) {
 		UserId:      userId,
 	})
 	if err != nil {
-		return "", err
+		return "", errors.Wrapf(err, "exchange-api AddOrder, uid: %d, req: %+v", userId, req)
 	}
 	return orderResp.OrderId, nil
 }

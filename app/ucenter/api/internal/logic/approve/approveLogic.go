@@ -2,6 +2,7 @@ package approve
 
 import (
 	"context"
+	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/logx"
 	"grpc-common/ucenter/types/user"
 	"time"
@@ -33,7 +34,7 @@ func (l *ApproveLogic) CheckSecuritySetting() (*types.ApproveResp, error) {
 		UserId: userId,
 	})
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "uid: %d", userId)
 	}
 
 	resp := &types.ApproveResp{}

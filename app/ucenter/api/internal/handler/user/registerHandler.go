@@ -1,8 +1,8 @@
-package register
+package user
 
 import (
 	"net/http"
-	"ucenter-api/internal/logic/register"
+	"ucenter-api/internal/logic/user"
 	"zero-common/result"
 	"zero-common/tools"
 
@@ -15,7 +15,7 @@ func RegisterHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.Request
 		if err := httpx.ParseJsonBody(r, &req); err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
+			result.ParamErrorResult(w, r, err)
 			return
 		}
 
@@ -26,8 +26,8 @@ func RegisterHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		env := r.Header.Get("env")
 		req.Env = env
 
-		l := register.NewRegisterLogic(r.Context(), svcCtx)
+		l := user.NewRegisterLogic(r.Context(), svcCtx)
 		resp, err := l.Register(&req)
-		result.HttpResult(r.Context(), w, resp, err)
+		result.HttpResult2(w, r, resp, err)
 	}
 }

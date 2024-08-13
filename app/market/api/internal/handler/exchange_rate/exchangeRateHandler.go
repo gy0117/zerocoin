@@ -14,7 +14,7 @@ func ExchangeRateHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.RateRequest
 		if err := httpx.ParsePath(r, &req); err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
+			result.ParamErrorResult(w, r, err)
 			return
 		}
 
@@ -22,6 +22,6 @@ func ExchangeRateHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		l := exchange_rate.NewExchangeRateLogic(r.Context(), svcCtx)
 		resp, err := l.UsdRate(&req)
-		result.HttpResult(r.Context(), w, resp, err)
+		result.HttpResult2(w, r, resp, err)
 	}
 }

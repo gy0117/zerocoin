@@ -1,8 +1,9 @@
-package login
+package user
 
 import (
 	"context"
 	"github.com/jinzhu/copier"
+	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/logx"
 	"grpc-common/ucenter/types/login"
 	"time"
@@ -31,17 +32,14 @@ func (l LoginLogic) Login(req *types.LoginReq) (*types.LoginResp, error) {
 
 	// 这里的参数需要转换，api层和rpc层的对象不要用同一个
 	loginReq := &login.LoginReq{}
-	if err := copier.Copy(loginReq, req); err != nil {
-		return nil, err
-	}
+	_ = copier.Copy(loginReq, req)
+
 	resp, err := l.svcCtx.UCLoginRpc.Login(ctx, loginReq)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "req: %+v", req)
 	}
 	result := &types.LoginResp{}
-	if err := copier.Copy(result, resp); err != nil {
-		return nil, err
-	}
+	_ = copier.Copy(result, resp)
 	return result, nil
 }
 
@@ -50,8 +48,7 @@ func (l LoginLogic) CheckLogin(token string) (bool, error) {
 	_, err := tools.ParseToken(token, l.svcCtx.Config.Jwt.AccessSecret)
 
 	if err != nil {
-		logx.Error(err)
-		return false, err
+		return false, errors.Wrapf(err, "token: %s", token)
 	}
 	return true, nil
 }

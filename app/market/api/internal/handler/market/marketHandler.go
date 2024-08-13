@@ -18,7 +18,7 @@ func SymbolThumbTrendHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		l := market.NewMarketLogic(r.Context(), svcCtx)
 		resp, err := l.SymbolThumbTrend(&req)
-		result.HttpResult(r.Context(), w, resp, err)
+		result.HttpResult2(w, r, resp, err)
 	}
 }
 
@@ -30,7 +30,7 @@ func SymbolThumbHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		l := market.NewMarketLogic(r.Context(), svcCtx)
 		resp, err := l.SymbolThumb(&req)
-		result.HttpResult(r.Context(), w, resp, err)
+		result.HttpResult2(w, r, resp, err)
 	}
 }
 
@@ -39,7 +39,7 @@ func SymbolInfoHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.MarketRequest
 		if err := httpx.ParseForm(r, &req); err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
+			result.ParamErrorResult(w, r, err)
 			return
 		}
 
@@ -47,7 +47,7 @@ func SymbolInfoHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		l := market.NewMarketLogic(r.Context(), svcCtx)
 		resp, err := l.SymbolInfo(&req)
-		result.HttpResult(r.Context(), w, resp, err)
+		result.HttpResult2(w, r, resp, err)
 	}
 }
 
@@ -56,14 +56,14 @@ func CoinInfoHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.MarketRequest
 		if err := httpx.ParseForm(r, &req); err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
+			result.ParamErrorResult(w, r, err)
 			return
 		}
 		req.Ip = tools.GetRemoteClientIp(r)
 
 		l := market.NewMarketLogic(r.Context(), svcCtx)
 		resp, err := l.CoinInfo(&req)
-		result.HttpResult(r.Context(), w, resp, err)
+		result.HttpResult2(w, r, resp, err)
 	}
 }
 
@@ -72,13 +72,13 @@ func HistoryHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.MarketRequest
 		if err := httpx.ParseForm(r, &req); err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
+			result.ParamErrorResult(w, r, err)
 			return
 		}
 		req.Ip = tools.GetRemoteClientIp(r)
 
 		l := market.NewMarketLogic(r.Context(), svcCtx)
 		resp, err := l.GetHistoryKline(&req)
-		result.HttpResult(r.Context(), w, resp.List, err) // 返回[][]any
+		result.HttpResult2(w, r, resp.List, err) // 返回[][]any
 	}
 }

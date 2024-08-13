@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"grpc-common/exchange/types/order"
+	"zero-common/interceptor/rpcserver"
 )
 
 var configFile = flag.String("f", "etc/conf.yaml", "the config file")
@@ -36,6 +37,10 @@ func main() {
 			reflection.Register(grpcServer)
 		}
 	})
+
+	// rpc log
+	s.AddUnaryInterceptors(rpcserver.LoggerInterceptor)
+
 	defer s.Stop()
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)

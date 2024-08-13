@@ -3,6 +3,7 @@ package wallet
 import (
 	"context"
 	"github.com/jinzhu/copier"
+	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/logx"
 	"grpc-common/ucenter/types/wallet"
 	"time"
@@ -38,12 +39,10 @@ func (l *WalletLogic) GetWalletInfo(req *types.WalletReq) (*types.UserWallet, er
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "uid: %d, coinName: %s", userId, req.CoinName)
 	}
 	result := &types.UserWallet{}
-	if err := copier.Copy(result, resp); err != nil {
-		return nil, err
-	}
+	_ = copier.Copy(result, resp)
 	return result, nil
 }
 
@@ -58,14 +57,11 @@ func (l *WalletLogic) FindWallet() ([]*types.UserWallet, error) {
 	}
 	findWalletResp, err := l.svcCtx.UCWalletRpc.FindWallet(ctx, in)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "uid: %d", userId)
 	}
 	var list []*types.UserWallet
 
-	if err := copier.Copy(&list, findWalletResp.List); err != nil {
-		logx.Error(err)
-		return nil, err
-	}
+	_ = copier.Copy(&list, findWalletResp.List)
 	return list, nil
 }
 
@@ -82,8 +78,7 @@ func (l *WalletLogic) ResetWalletAddress(req *types.WalletReq) (string, error) {
 	}
 	_, err := l.svcCtx.UCWalletRpc.ResetWalletAddress(ctx, in)
 	if err != nil {
-		logx.Error(err)
-		return "", err
+		return "", errors.Wrapf(err, "uid: %d", userId)
 	}
 	return "", nil
 }
@@ -106,7 +101,7 @@ func (l *WalletLogic) GetAllTransactions(req *types.TransactionReq) (*pages.Page
 	}
 	resp, err := l.svcCtx.UCWalletRpc.GetAllTransactions(ctx, in)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "req: %+v", in)
 	}
 
 	b := make([]any, len(resp.List))

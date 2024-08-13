@@ -4,10 +4,8 @@ package handler
 import (
 	"net/http"
 	"ucenter-api/internal/handler/approve"
-	"ucenter-api/internal/handler/login"
-	"ucenter-api/internal/handler/register"
+	"ucenter-api/internal/handler/user"
 	"ucenter-api/internal/handler/wallet"
-	"ucenter-api/internal/handler/withdraw"
 	"ucenter-api/internal/middleware"
 
 	"ucenter-api/internal/svc"
@@ -30,12 +28,12 @@ func addRegisterRouters(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				Method:  http.MethodPost,
 				Path:    "/uc/register/phone",
-				Handler: register.RegisterHandler(serverCtx),
+				Handler: user.RegisterHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodPost,
 				Path:    "/uc/mobile/code",
-				Handler: register.SendCodeHandler(serverCtx),
+				Handler: user.SendCodeHandler(serverCtx),
 			},
 		},
 	)
@@ -48,12 +46,12 @@ func addLoginRouters(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				Method:  http.MethodPost,
 				Path:    "/uc/login",
-				Handler: login.LoginHandler(serverCtx),
+				Handler: user.LoginHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodPost,
 				Path:    "/uc/check/login",
-				Handler: login.CheckLoginHandler(serverCtx),
+				Handler: user.CheckLoginHandler(serverCtx),
 			},
 		},
 	)
@@ -65,12 +63,12 @@ func addWalletRouters(server *rest.Server, serverCtx *svc.ServiceContext) {
 		{
 			Method:  http.MethodPost,
 			Path:    "/uc/asset/wallet/:coinName",
-			Handler: wallet.WalletHandler(serverCtx),
+			Handler: wallet.GetWalletWithCoin(serverCtx),
 		},
 		{
 			Method:  http.MethodPost,
 			Path:    "/uc/asset/wallet",
-			Handler: wallet.FindWallet(serverCtx),
+			Handler: wallet.GetWallet(serverCtx),
 		},
 		{
 			Method:  http.MethodPost,
@@ -94,22 +92,22 @@ func addWithdrawRouters(server *rest.Server, serverCtx *svc.ServiceContext) {
 		{
 			Method:  http.MethodPost,
 			Path:    "/uc/withdraw/support/coin/info",
-			Handler: withdraw.GetSupportedCoinInfo(serverCtx),
+			Handler: wallet.GetSupportedCoinInfo(serverCtx),
 		},
 		{
 			Method:  http.MethodPost,
 			Path:    "/uc/mobile/withdraw/code",
-			Handler: withdraw.SendCode(serverCtx),
+			Handler: wallet.SendCode(serverCtx),
 		},
 		{
 			Method:  http.MethodPost,
 			Path:    "/uc/withdraw/apply/code",
-			Handler: withdraw.Withdraw(serverCtx),
+			Handler: wallet.Withdraw(serverCtx),
 		},
 		{
 			Method:  http.MethodPost,
 			Path:    "/uc/withdraw/record",
-			Handler: withdraw.Record(serverCtx),
+			Handler: wallet.Record(serverCtx),
 		},
 	}
 	server.AddRoutes(

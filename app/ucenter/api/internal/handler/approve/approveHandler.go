@@ -11,6 +11,6 @@ func SecuritySetting(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		l := approve.NewApproveLogic(r.Context(), svcCtx)
 		resp, err := l.CheckSecuritySetting()
-		result.HttpResult(r.Context(), w, resp, err)
+		result.HttpResult2(w, r, resp, err)
 	}
 }

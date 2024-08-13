@@ -1,8 +1,9 @@
-package register
+package user
 
 import (
 	"context"
 	"github.com/jinzhu/copier"
+	"github.com/pkg/errors"
 	"grpc-common/ucenter/types/register"
 	"time"
 
@@ -27,7 +28,6 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 }
 
 func (l *RegisterLogic) Register(req *types.Request) (*types.RegisterResp, error) {
-	logx.Info("ucenter-api | api register call...")
 	ctx, cancel := context.WithTimeout(l.ctx, time.Second*30)
 	defer cancel()
 
@@ -36,24 +36,15 @@ func (l *RegisterLogic) Register(req *types.Request) (*types.RegisterResp, error
 	if err := copier.Copy(registerReq, req); err != nil {
 		return nil, err
 	}
-	//logx.Infof("registerReq: %+v", registerReq)
 
 	_, err := l.svcCtx.UCRegisterRpc.RegisterByPhone(ctx, registerReq)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "req: %+v", req)
 	}
-
-	//var resp types.RegisterResp
-	//if err = copier.Copy(&resp, registerResp); err != nil {
-	//	return nil, err
-	//}
-	//
-	//return &resp, nil
 	return nil, nil
 }
 
 func (l *RegisterLogic) SendCode(req *types.CodeReq) (resp *types.CodeResp, err error) {
-	logx.Info("ucenter-api | api sendCode call...")
 	ctx, cancel := context.WithTimeout(l.ctx, time.Second*30)
 	defer cancel()
 	data, err := l.svcCtx.UCRegisterRpc.SendCode(ctx, &register.CodeReq{
@@ -61,7 +52,7 @@ func (l *RegisterLogic) SendCode(req *types.CodeReq) (resp *types.CodeResp, err 
 		Phone:   req.Phone,
 	})
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "req: %+v", req)
 	}
 	return &types.CodeResp{
 		SmsCode: data.GetSmsCode(),
