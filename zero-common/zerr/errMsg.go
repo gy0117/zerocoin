@@ -25,7 +25,7 @@ func init() {
 	// 登录
 	msg[USER_LOGIN_ERROR] = "登录失败"
 	msg[USER_PHONE_NOT_EXIST_ERROR] = "手机号不存在"
-	msg[USER_PASSWORD_ERROR] = "密码"
+	msg[USER_PASSWORD_ERROR] = "密码错误"
 
 	// user
 	msg[FIND_USER_ERROR] = "查找用户失败"
