@@ -116,7 +116,7 @@ services:
       - elasticsearch
       - kafka
 
-  #搜集kafka业务日志、存储prometheus监控数据
+  #收集kafka业务日志、存储prometheus监控数据
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.13.4
     container_name: elasticsearch

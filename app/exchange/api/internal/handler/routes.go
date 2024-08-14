@@ -2,7 +2,6 @@
 package handler
 
 import (
-	"exchange-api/internal/handler/order"
 	"exchange-api/internal/middleware"
 	"exchange-api/internal/svc"
 	"github.com/zeromicro/go-zero/rest"
@@ -18,17 +17,17 @@ func addOrderRouters(server *rest.Server, serverCtx *svc.ServiceContext) {
 		{
 			Method:  http.MethodPost,
 			Path:    "/exchange/order/history",
-			Handler: order.GetHistoryOrders(serverCtx),
+			Handler: GetHistoryOrders(serverCtx),
 		},
 		{
 			Method:  http.MethodPost,
 			Path:    "/exchange/order/current",
-			Handler: order.GetCurrentOrders(serverCtx),
+			Handler: GetCurrentOrders(serverCtx),
 		},
 		{
-			Method: http.MethodPost,
-			Path: "/exchange/order/add",
-			Handler: order.AddOrder(serverCtx),
+			Method:  http.MethodPost,
+			Path:    "/exchange/order/add",
+			Handler: AddOrder(serverCtx),
 		},
 	}
 	server.AddRoutes(rest.WithMiddleware(middleware.Auth(serverCtx.Config.Jwt.AccessSecret), rs...))

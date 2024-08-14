@@ -7,7 +7,6 @@ import (
 	"grpc-common/market/mclient"
 	"grpc-common/market/types/market"
 	"market-api/internal/model"
-	"market-api/internal/processor/handler"
 	"zero-common/kafka"
 )
 
@@ -30,19 +29,19 @@ type ProcessData struct {
 
 type Processor interface {
 	Process(data ProcessData)
-	AddHandler(h handler.MarketHandler)
+	AddHandler(h MarketHandler)
 	GetThumb() any
 }
 
 type DefaultProcessor struct {
-	handlers []handler.MarketHandler
+	handlers []MarketHandler
 	kafkaCli *kafka.KafkaClient
 	thumbMap map[string]*market.CoinThumb
 }
 
 func NewDefaultProcessor(kafkaCli *kafka.KafkaClient) *DefaultProcessor {
 	return &DefaultProcessor{
-		handlers: make([]handler.MarketHandler, 0),
+		handlers: make([]MarketHandler, 0),
 		kafkaCli: kafkaCli,
 		thumbMap: make(map[string]*market.CoinThumb),
 	}
@@ -70,7 +69,7 @@ func (p *DefaultProcessor) Process(data ProcessData) {
 	}
 }
 
-func (p *DefaultProcessor) AddHandler(h handler.MarketHandler) {
+func (p *DefaultProcessor) AddHandler(h MarketHandler) {
 	p.handlers = append(p.handlers, h)
 }
 

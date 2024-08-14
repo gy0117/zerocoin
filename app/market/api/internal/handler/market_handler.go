@@ -1,8 +1,8 @@
-package market
+package handler
 
 import (
 	"github.com/zeromicro/go-zero/rest/httpx"
-	"market-api/internal/logic/market"
+	"market-api/internal/logic"
 	"market-api/internal/svc"
 	"market-api/internal/types"
 	"net/http"
@@ -16,7 +16,7 @@ func SymbolThumbTrendHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		var req types.MarketRequest
 		req.Ip = tools.GetRemoteClientIp(r)
 
-		l := market.NewMarketLogic(r.Context(), svcCtx)
+		l := logic.NewMarketLogic(r.Context(), svcCtx)
 		resp, err := l.SymbolThumbTrend(&req)
 		result.HttpResult2(w, r, resp, err)
 	}
@@ -28,7 +28,7 @@ func SymbolThumbHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		var req types.MarketRequest
 		req.Ip = tools.GetRemoteClientIp(r)
 
-		l := market.NewMarketLogic(r.Context(), svcCtx)
+		l := logic.NewMarketLogic(r.Context(), svcCtx)
 		resp, err := l.SymbolThumb(&req)
 		result.HttpResult2(w, r, resp, err)
 	}
@@ -45,7 +45,7 @@ func SymbolInfoHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		req.Ip = tools.GetRemoteClientIp(r)
 
-		l := market.NewMarketLogic(r.Context(), svcCtx)
+		l := logic.NewMarketLogic(r.Context(), svcCtx)
 		resp, err := l.SymbolInfo(&req)
 		result.HttpResult2(w, r, resp, err)
 	}
@@ -61,7 +61,7 @@ func CoinInfoHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 		req.Ip = tools.GetRemoteClientIp(r)
 
-		l := market.NewMarketLogic(r.Context(), svcCtx)
+		l := logic.NewMarketLogic(r.Context(), svcCtx)
 		resp, err := l.CoinInfo(&req)
 		result.HttpResult2(w, r, resp, err)
 	}
@@ -77,7 +77,7 @@ func HistoryHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 		req.Ip = tools.GetRemoteClientIp(r)
 
-		l := market.NewMarketLogic(r.Context(), svcCtx)
+		l := logic.NewMarketLogic(r.Context(), svcCtx)
 		resp, err := l.GetHistoryKline(&req)
 		result.HttpResult2(w, r, resp.List, err) // 返回[][]any
 	}

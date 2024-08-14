@@ -1,4 +1,4 @@
-package approve
+package logic
 
 import (
 	"context"

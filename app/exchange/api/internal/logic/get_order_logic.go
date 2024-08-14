@@ -1,4 +1,4 @@
-package order
+package logic
 
 import (
 	"context"
@@ -11,22 +11,21 @@ import (
 	"time"
 )
 
-type OrderLogic struct {
+type GetOrderLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
-func NewOrderLogic(ctx context.Context, svcCtx *svc.ServiceContext) *OrderLogic {
-	return &OrderLogic{
+func NewGetOrderLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetOrderLogic {
+	return &GetOrderLogic{
 		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
 }
 
-// GetHistoryOrders 分页
-func (l *OrderLogic) GetHistoryOrders(req *types.ExchangeReq) (*page.PageData, error) {
+func (l *GetOrderLogic) GetHistoryOrders(req *types.ExchangeReq) (*page.PageData, error) {
 	ctx, cancel := context.WithTimeout(l.ctx, time.Second*10)
 	defer cancel()
 
@@ -54,7 +53,7 @@ func (l *OrderLogic) GetHistoryOrders(req *types.ExchangeReq) (*page.PageData, e
 	return data, nil
 }
 
-func (l *OrderLogic) GetCurrentOrders(req *types.ExchangeReq) (*page.PageData, error) {
+func (l *GetOrderLogic) GetCurrentOrders(req *types.ExchangeReq) (*page.PageData, error) {
 	ctx, cancel := context.WithTimeout(l.ctx, time.Second*10)
 	defer cancel()
 
@@ -79,26 +78,4 @@ func (l *OrderLogic) GetCurrentOrders(req *types.ExchangeReq) (*page.PageData, e
 	}
 	data := page.New(b, req.PageNo, req.PageSize, orderResp.Total)
 	return data, nil
-}
-
-func (l *OrderLogic) AddOrder(req *types.ExchangeReq) (string, error) {
-	ctx, cancel := context.WithTimeout(l.ctx, time.Second*10)
-	defer cancel()
-
-	userId := ctx.Value("userId").(int64)
-
-	// rpc调用
-	orderResp, err := l.svcCtx.OrderRpc.AddOrder(ctx, &order.OrderReq{
-		Symbol:      req.Symbol,
-		Price:       req.Price,
-		Amount:      req.Amount,
-		Direction:   req.Direction,
-		Type:        req.Type,
-		UseDiscount: int32(req.UseDiscount),
-		UserId:      userId,
-	})
-	if err != nil {
-		return "", errors.Wrapf(err, "exchange-api AddOrder, uid: %d, req: %+v", userId, req)
-	}
-	return orderResp.OrderId, nil
 }

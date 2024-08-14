@@ -1,8 +1,8 @@
-package exchange_rate
+package handler
 
 import (
 	"github.com/zeromicro/go-zero/rest/httpx"
-	"market-api/internal/logic/exchange_rate"
+	"market-api/internal/logic"
 	"market-api/internal/svc"
 	"market-api/internal/types"
 	"net/http"
@@ -20,7 +20,7 @@ func ExchangeRateHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		req.Ip = tools.GetRemoteClientIp(r)
 
-		l := exchange_rate.NewExchangeRateLogic(r.Context(), svcCtx)
+		l := logic.NewExchangeRateLogic(r.Context(), svcCtx)
 		resp, err := l.UsdRate(&req)
 		result.HttpResult2(w, r, resp, err)
 	}

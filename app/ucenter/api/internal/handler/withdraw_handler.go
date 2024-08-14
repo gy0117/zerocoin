@@ -1,9 +1,9 @@
-package wallet
+package handler
 
 import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 	"net/http"
-	"ucenter-api/internal/logic/wallet"
+	"ucenter-api/internal/logic"
 	"ucenter-api/internal/svc"
 	"ucenter-api/internal/types"
 	"zero-common/result"
@@ -11,7 +11,7 @@ import (
 
 func GetSupportedCoinInfo(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		l := wallet.NewWithdrawLogic(r.Context(), svcCtx)
+		l := logic.NewWithdrawLogic(r.Context(), svcCtx)
 		resp, err := l.GetSupportedCoinInfo()
 		result.HttpResult2(w, r, resp, err)
 	}
@@ -19,7 +19,7 @@ func GetSupportedCoinInfo(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 func SendCode(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		l := wallet.NewWithdrawLogic(r.Context(), svcCtx)
+		l := logic.NewWithdrawLogic(r.Context(), svcCtx)
 		err := l.SendCode()
 		result.HttpResult2(w, r, nil, err)
 	}
@@ -34,7 +34,7 @@ func Withdraw(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := wallet.NewWithdrawLogic(r.Context(), svcCtx)
+		l := logic.NewWithdrawLogic(r.Context(), svcCtx)
 		err := l.Withdraw(&req)
 		result.HttpResult2(w, r, nil, err)
 	}
@@ -49,7 +49,7 @@ func Record(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := wallet.NewWithdrawLogic(r.Context(), svcCtx)
+		l := logic.NewWithdrawLogic(r.Context(), svcCtx)
 		resp, err := l.Record(&req)
 		result.HttpResult2(w, r, resp, err)
 	}

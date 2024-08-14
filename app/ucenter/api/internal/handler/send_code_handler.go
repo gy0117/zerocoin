@@ -1,9 +1,9 @@
-package user
+package handler
 
 import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 	"net/http"
-	"ucenter-api/internal/logic/user"
+	"ucenter-api/internal/logic"
 	"ucenter-api/internal/svc"
 	"ucenter-api/internal/types"
 	"zero-common/result"
@@ -17,7 +17,7 @@ func SendCodeHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := user.NewRegisterLogic(r.Context(), svcCtx)
+		l := logic.NewRegisterLogic(r.Context(), svcCtx)
 		resp, err := l.SendCode(&req)
 		result.HttpResult2(w, r, resp, err)
 	}

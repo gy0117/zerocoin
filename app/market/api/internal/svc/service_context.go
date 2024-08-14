@@ -5,7 +5,6 @@ import (
 	"grpc-common/market/mclient"
 	"market-api/internal/config"
 	"market-api/internal/processor"
-	"market-api/internal/processor/handler"
 	"market-api/internal/ws"
 	"zero-common/kafka"
 )
@@ -25,7 +24,7 @@ func NewServiceContext(c config.Config, server *ws.WebSocketServer) *ServiceCont
 	kafkaCli := kafka.NewKafkaClient(c.Kafka)
 	defaultProcessor := processor.NewDefaultProcessor(kafkaCli)
 	defaultProcessor.Init(market)
-	defaultProcessor.AddHandler(handler.NewWsHandler(server))
+	defaultProcessor.AddHandler(processor.NewWsHandler(server))
 
 	return &ServiceContext{
 		Config:          c,

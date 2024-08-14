@@ -2,8 +2,6 @@
 package handler
 
 import (
-	"market-api/internal/handler/exchange_rate"
-	"market-api/internal/handler/market"
 	"market-api/internal/svc"
 	"net/http"
 
@@ -22,7 +20,7 @@ func addExchangeRateRouters(server *rest.Server, serverCtx *svc.ServiceContext) 
 			{
 				Method:  http.MethodPost,
 				Path:    "/market/exchange-rate/usd/:unit",
-				Handler: exchange_rate.ExchangeRateHandler(serverCtx),
+				Handler: ExchangeRateHandler(serverCtx),
 			},
 		},
 	)
@@ -34,27 +32,27 @@ func addMarketRouters(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				Method:  http.MethodPost,
 				Path:    "/market/symbol-thumb-trend",
-				Handler: market.SymbolThumbTrendHandler(serverCtx),
+				Handler: SymbolThumbTrendHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodPost,
 				Path:    "/market/symbol-thumb",
-				Handler: market.SymbolThumbHandler(serverCtx),
+				Handler: SymbolThumbHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodPost,
 				Path:    "/market/symbol-info",
-				Handler: market.SymbolInfoHandler(serverCtx),
+				Handler: SymbolInfoHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodPost,
 				Path:    "/market/coin-info",
-				Handler: market.CoinInfoHandler(serverCtx),
+				Handler: CoinInfoHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodGet,
 				Path:    "/market/history",
-				Handler: market.HistoryHandler(serverCtx),
+				Handler: HistoryHandler(serverCtx),
 			},
 		},
 	)

@@ -1,4 +1,4 @@
-package exchange_rate
+package logic
 
 import (
 	"context"

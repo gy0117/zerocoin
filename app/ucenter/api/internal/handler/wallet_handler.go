@@ -1,9 +1,9 @@
-package wallet
+package handler
 
 import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 	"net/http"
-	"ucenter-api/internal/logic/wallet"
+	"ucenter-api/internal/logic"
 	"ucenter-api/internal/svc"
 	"ucenter-api/internal/types"
 	"zero-common/result"
@@ -18,7 +18,7 @@ func GetWalletWithCoin(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := wallet.NewWalletLogic(r.Context(), svcCtx)
+		l := logic.NewWalletLogic(r.Context(), svcCtx)
 		resp, err := l.GetWalletInfo(&req)
 		result.HttpResult2(w, r, resp, err)
 	}
@@ -27,7 +27,7 @@ func GetWalletWithCoin(svcCtx *svc.ServiceContext) http.HandlerFunc {
 // 返回用户钱包信息
 func GetWallet(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		l := wallet.NewWalletLogic(r.Context(), svcCtx)
+		l := logic.NewWalletLogic(r.Context(), svcCtx)
 		resp, err := l.FindWallet()
 		result.HttpResult2(w, r, resp, err)
 	}
@@ -42,7 +42,7 @@ func ResetWalletAddress(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := wallet.NewWalletLogic(r.Context(), svcCtx)
+		l := logic.NewWalletLogic(r.Context(), svcCtx)
 		resp, err := l.ResetWalletAddress(&req)
 		result.HttpResult2(w, r, resp, err)
 	}
@@ -56,7 +56,7 @@ func GetAllTransactions(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			result.ParamErrorResult(w, r, err)
 			return
 		}
-		l := wallet.NewWalletLogic(r.Context(), svcCtx)
+		l := logic.NewWalletLogic(r.Context(), svcCtx)
 		resp, err := l.GetAllTransactions(&req)
 		result.HttpResult2(w, r, resp, err)
 	}

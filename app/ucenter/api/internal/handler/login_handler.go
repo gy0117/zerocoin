@@ -1,19 +1,18 @@
-package user
+package handler
 
 import (
-	"net/http"
-	"ucenter-api/internal/logic/user"
-	"zero-common/result"
-	"zero-common/tools"
-
 	"github.com/zeromicro/go-zero/rest/httpx"
+	"net/http"
+	"ucenter-api/internal/logic"
 	"ucenter-api/internal/svc"
 	"ucenter-api/internal/types"
+	"zero-common/result"
+	"zero-common/tools"
 )
 
-func RegisterHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func LoginHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.Request
+		var req types.LoginReq
 		if err := httpx.ParseJsonBody(r, &req); err != nil {
 			result.ParamErrorResult(w, r, err)
 			return
@@ -22,12 +21,11 @@ func RegisterHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		// 获取ip
 		req.Ip = tools.GetRemoteClientIp(r)
 
-		// 获取env
 		env := r.Header.Get("env")
 		req.Env = env
 
-		l := user.NewRegisterLogic(r.Context(), svcCtx)
-		resp, err := l.Register(&req)
+		l := logic.NewLoginLogic(r.Context(), svcCtx)
+		resp, err := l.Login(&req)
 		result.HttpResult2(w, r, resp, err)
 	}
 }
