@@ -2,3 +2,6 @@
 docker/
 .DS_Store
 app/market/api/logs
+app/ucenter/api/logs/
+app/ucenter/rpc/logs/
+data/

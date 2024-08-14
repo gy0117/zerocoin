@@ -19,8 +19,12 @@ func main() {
 	flag.Parse()
 
 	logx.MustSetup(logx.LogConf{
-		Encoding: "plain",
-		Stat:     false,
+		//Encoding: "plain",
+		//Stat:     false,
+		Encoding:    "json",
+		Mode:        "file",
+		ServiceName: "ucenter-rpc",
+		Path:        "logs",
 	})
 
 	var c config.Config

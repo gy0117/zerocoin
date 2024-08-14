@@ -49,6 +49,10 @@ func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic 
 func (l *LoginLogic) Login(in *login.LoginReq) (*login.LoginResp, error) {
 	// 如果使用postman的话，就不走人机验证
 	logx.Info("in.Env = " + in.Env)
+
+	logx.Error("测试的日志, login-rpc")
+	logx.Info("测试的日志-info, login-rpc")
+
 	// TODO 暂时不走人机验证
 	//if in.Env != "dev_postman" {
 	//	// 1. 人机验证
