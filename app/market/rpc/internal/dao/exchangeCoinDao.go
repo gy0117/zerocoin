@@ -27,14 +27,13 @@ func (dao *ExchangeCoinDao) FindCoinVisible(ctx context.Context) (list []*model.
 	return
 }
 
-func (dao *ExchangeCoinDao) FindBySymbol(ctx context.Context, symbol string) (*model.ExchangeCoin, error) {
+func (dao *ExchangeCoinDao) FindBySymbol(ctx context.Context, symbol string) (ec *model.ExchangeCoin, err error) {
 	session := dao.conn.Session(ctx)
-	ec := model.ExchangeCoin{}
 	// 查exchange_coin表
-	err := session.Model(&model.ExchangeCoin{}).Where("symbol=?", symbol).Find(&ec).Error
+	err = session.Model(&model.ExchangeCoin{}).Where("symbol=?", symbol).Take(&ec).Error
 	// 处理特殊case，找不到记录
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil
 	}
-	return &ec, err
+	return
 }

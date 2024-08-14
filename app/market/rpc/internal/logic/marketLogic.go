@@ -51,10 +51,8 @@ func (l *MarketLogic) FindSymbolThumbTrend(in *market.MarketRequest) (*market.Co
 
 func (l *MarketLogic) FindSymbolInfo(in *market.MarketRequest) (*market.ExchangeCoin, error) {
 	// 1. 查询exchange_coin表中的数据，根据symbol
-	ctx, cancel := context.WithTimeout(l.ctx, time.Second*5)
-	defer cancel()
 	symbol := in.GetSymbol()
-	coin, err := l.exchangeCoinDomain.FindBySymbol(ctx, symbol)
+	coin, err := l.exchangeCoinDomain.FindBySymbol(l.ctx, symbol)
 	if err != nil {
 		return nil, errors.Wrapf(ErrMarketFindSymbol, "market find symbol: %s", symbol)
 	}
