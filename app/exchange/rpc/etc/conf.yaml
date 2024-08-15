@@ -30,3 +30,8 @@ Kafka:
   Addr: "192.168.0.101:9093"
   WriteCap: 100
   ReadCap: 100
+LogConfig:
+  ServiceName: exchange-rpc
+  Mode: console
+  Encoding: plain
+  Stat: false

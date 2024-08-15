@@ -19,13 +19,9 @@ var configFile = flag.String("f", "etc/conf.yaml", "the config file")
 func main() {
 	flag.Parse()
 
-	logx.MustSetup(logx.LogConf{
-		Encoding: "plain",
-		Stat:     false,
-	})
-
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
+	logx.MustSetup(c.LogConfig)
 
 	server := rest.MustNewServer(
 		c.RestConf,

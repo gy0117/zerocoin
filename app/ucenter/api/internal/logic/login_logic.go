@@ -30,9 +30,8 @@ func (l LoginLogic) Login(req *types.LoginReq) (*types.LoginResp, error) {
 	ctx, cancel := context.WithTimeout(l.ctx, time.Second*30)
 	defer cancel()
 
-	// TODO 测试
-	logx.Error("测试的日志, login-api")
-	logx.Info("测试的日志-info, login-api")
+	//logx.Error("测试的日志, login-api")
+	//logx.Info("测试的日志-info, login-api")
 
 	// 这里的参数需要转换，api层和rpc层的对象不要用同一个
 	loginReq := &login.LoginReq{}

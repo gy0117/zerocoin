@@ -20,15 +20,9 @@ var configFile = flag.String("f", "etc/conf.yaml", "the config file")
 func main() {
 	flag.Parse()
 
-	logx.MustSetup(logx.LogConf{
-		Encoding:    "json",
-		Mode:        "file",
-		ServiceName: "market_api",
-		Path:        "logs",
-	})
-
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
+	logx.MustSetup(c.LogConfig)
 
 	wsServer := ws.NewWebSocketServer("/socket.io")
 

@@ -16,3 +16,8 @@ MarketRpc:
       - 127.0.0.1:2379
     Key: market.rpc
   NonBlock: true
+LogConfig:
+  ServiceName: ucenter-api
+  Mode: console
+  Encoding: plain
+  Stat: false

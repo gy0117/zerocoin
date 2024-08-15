@@ -11,3 +11,8 @@ Kafka:
   WriteCap: 100
   ReadCap: 100
   ConsumerGroup: "kline1m-thumb-consumer"
+LogConfig:
+  ServiceName: market-api
+  Mode: console
+  Encoding: plain
+  Stat: false

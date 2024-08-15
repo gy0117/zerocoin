@@ -27,17 +27,20 @@ var configFile = flag.String("f", "etc/conf.yaml", "the config file")
 func main() {
 	flag.Parse()
 
-	logx.MustSetup(logx.LogConf{
-		//Encoding: "plain",
-		//Stat:     false,
-		Encoding:    "json",
-		Mode:        "file",
-		ServiceName: "ucenter-rpc",
-		Path:        "logs",
-	})
+	//logx.MustSetup(logx.LogConf{
+	//	Encoding: "plain",
+	//	Stat:     false,
+	//	//Encoding:    "json",
+	//	//Mode:        "file",
+	//	//ServiceName: "ucenter-rpc",
+	//	//Path:        "logs",
+	//})
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
+
+	logx.MustSetup(c.LogConfig)
+
 	ctx := svc.NewServiceContext(c)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {

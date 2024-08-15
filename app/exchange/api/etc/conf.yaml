@@ -10,3 +10,8 @@ Jwt:
   AccessSecret: "zerocoin-gogohigher-!@#$"
   AccessExpire: 604800
   Issuer: "zerocoin-marsxingzhi"
+LogConfig:
+  ServiceName: exchange-api
+  Mode: console
+  Encoding: plain
+  Stat: false

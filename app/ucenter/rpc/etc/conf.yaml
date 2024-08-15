@@ -34,3 +34,8 @@ ExchangeRpc:
     Key: exchange.rpc
   NonBlock: true
 Mode: dev
+LogConfig:
+  ServiceName: ucenter-rpc
+  Mode: console
+  Encoding: plain
+  Stat: false

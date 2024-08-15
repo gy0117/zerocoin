@@ -23,3 +23,8 @@ UCenterRpc:
     Hosts:
       - 127.0.0.1:2379
     Key: ucenter.rpc
+LogConfig:
+  ServiceName: job-center
+  Mode: console
+  Encoding: plain
+  Stat: false
