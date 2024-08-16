@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
 	"grpc-common/ucenter/types/login"
 	"grpc-common/ucenter/types/user"
@@ -26,15 +25,6 @@ var configFile = flag.String("f", "etc/conf.yaml", "the config file")
 
 func main() {
 	flag.Parse()
-
-	//logx.MustSetup(logx.LogConf{
-	//	Encoding: "plain",
-	//	Stat:     false,
-	//	//Encoding:    "json",
-	//	//Mode:        "file",
-	//	//ServiceName: "ucenter-rpc",
-	//	//Path:        "logs",
-	//})
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
@@ -60,6 +50,6 @@ func main() {
 
 	defer s.Stop()
 
-	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
+	logx.Infof("Starting rpc server at %s...", c.ListenOn)
 	s.Start()
 }

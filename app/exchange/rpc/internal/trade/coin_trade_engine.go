@@ -61,12 +61,12 @@ func (engine *CoinTradeEngine) Trade(order *model.ExchangeOrder) {
 		// 限价单，先与限价单进行成交；如果未成交，继续与市价单进行成交
 		engine.matchLimitPriceWithLimitPrice(limitPriceList, order)
 
-		if order.Status == model.StatusTrading {
+		if order.Status == model.OrderStatus_Trading {
 			engine.matchLimitPriceWithMarketPrice(marketPriceList, order)
 		}
 
 		// 如果还没成交，则加入到买卖盘
-		if order.Status == model.StatusTrading {
+		if order.Status == model.OrderStatus_Trading {
 			engine.addLimitPriceQueue(order)
 			if order.Direction == model.DirectionBuyInt {
 				engine.sendTradePlateData(engine.buyTradePlate)
@@ -195,14 +195,14 @@ func (engine *CoinTradeEngine) matchLimitPriceWithMarketPrice(list queue.TradeTi
 
 			// 如果matchOrder用完
 			if operate.SubFloor(matchOrder.Amount, matchOrder.TradedAmount, 8) <= 0 {
-				matchOrder.Status = model.StatusCompleted
+				matchOrder.Status = model.OrderStatus_Completed
 				// 删除 matchOrder
 				delOrders = append(delOrders, matchOrder.OrderId)
 			}
 
 			curOrder.TradedAmount = operate.AddFloor(curOrder.TradedAmount, unTradedAmount, 8)
 			curOrder.Turnover = operate.AddFloor(curOrder.Turnover, curTurnover, 8)
-			curOrder.Status = model.StatusCompleted
+			curOrder.Status = model.OrderStatus_Completed
 
 			// 市价没有买卖盘
 			break
@@ -212,7 +212,7 @@ func (engine *CoinTradeEngine) matchLimitPriceWithMarketPrice(list queue.TradeTi
 
 			curTurnover := operate.MulFloor(price, matchAmount, 8)
 			matchOrder.Turnover = operate.AddFloor(matchOrder.Turnover, curTurnover, 8)
-			matchOrder.Status = model.StatusCompleted
+			matchOrder.Status = model.OrderStatus_Completed
 			delOrders = append(delOrders, matchOrder.OrderId)
 
 			curOrder.TradedAmount = operate.AddFloor(curOrder.TradedAmount, matchAmount, 8)
@@ -279,7 +279,7 @@ func (engine *CoinTradeEngine) matchLimitPriceWithLimitPrice(list *queue.LimitPr
 
 				// 如果matchOrder用完
 				if operate.SubFloor(matchOrder.Amount, matchOrder.TradedAmount, 8) <= 0 {
-					matchOrder.Status = model.StatusCompleted
+					matchOrder.Status = model.OrderStatus_Completed
 
 					// 删除 matchOrder
 					delOrders = append(delOrders, matchOrder.OrderId)
@@ -288,7 +288,7 @@ func (engine *CoinTradeEngine) matchLimitPriceWithLimitPrice(list *queue.LimitPr
 
 				curOrder.TradedAmount = operate.AddFloor(curOrder.TradedAmount, unTradedAmount, 8)
 				curOrder.Turnover = operate.AddFloor(curOrder.Turnover, curTurnover, 8)
-				curOrder.Status = model.StatusCompleted
+				curOrder.Status = model.OrderStatus_Completed
 				completeOrders = append(completeOrders, curOrder)
 
 				// 更新买卖盘
@@ -306,7 +306,7 @@ func (engine *CoinTradeEngine) matchLimitPriceWithLimitPrice(list *queue.LimitPr
 
 				curTurnover := operate.MulFloor(matchOrder.Price, matchAmount, 8)
 				matchOrder.Turnover = operate.AddFloor(matchOrder.Turnover, curTurnover, 8)
-				matchOrder.Status = model.StatusCompleted
+				matchOrder.Status = model.OrderStatus_Completed
 				delOrders = append(delOrders, matchOrder.OrderId)
 				completeOrders = append(completeOrders, matchOrder)
 
@@ -388,7 +388,7 @@ func (engine *CoinTradeEngine) matchMarketPriceWithLimitPrice(list *queue.LimitP
 
 				// 如果matchOrder用完
 				if operate.SubFloor(matchOrder.Amount, matchOrder.TradedAmount, 8) <= 0 {
-					matchOrder.Status = model.StatusCompleted
+					matchOrder.Status = model.OrderStatus_Completed
 					// 删除 matchOrder
 					delOrders = append(delOrders, matchOrder.OrderId)
 				}
@@ -396,7 +396,7 @@ func (engine *CoinTradeEngine) matchMarketPriceWithLimitPrice(list *queue.LimitP
 				// 处理当前订单
 				curOrder.TradedAmount = operate.AddFloor(curOrder.TradedAmount, unTradedAmount, 8)
 				curOrder.Turnover = operate.AddFloor(curOrder.Turnover, curTurnover, 8)
-				curOrder.Status = model.StatusCompleted
+				curOrder.Status = model.OrderStatus_Completed
 
 				// 更新买卖盘
 				if matchOrder.Direction == model.DirectionBuyInt {
@@ -413,7 +413,7 @@ func (engine *CoinTradeEngine) matchMarketPriceWithLimitPrice(list *queue.LimitP
 
 				curTurnover := operate.MulFloor(matchOrder.Price, matchAmount, 8)
 				matchOrder.Turnover = operate.AddFloor(matchOrder.Turnover, curTurnover, 8)
-				matchOrder.Status = model.StatusCompleted
+				matchOrder.Status = model.OrderStatus_Completed
 
 				delOrders = append(delOrders, matchOrder.OrderId)
 
@@ -448,7 +448,7 @@ func (engine *CoinTradeEngine) matchMarketPriceWithLimitPrice(list *queue.LimitP
 	}
 
 	// 判断订单是否完成，如果没有完成，放入队列
-	if curOrder.Status == model.StatusTrading {
+	if curOrder.Status == model.OrderStatus_Trading {
 		// 说明没有完成
 		engine.addMarketPriceQueue(curOrder)
 	}
@@ -488,7 +488,7 @@ func (engine *CoinTradeEngine) addLimitPriceQueue(order *model.ExchangeOrder) {
 
 // 订单完成后，需要更新订单列表
 func (engine *CoinTradeEngine) sendCompleteOrder(order *model.ExchangeOrder) {
-	if order.Status != model.StatusCompleted {
+	if order.Status != model.OrderStatus_Completed {
 		return
 	}
 

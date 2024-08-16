@@ -10,9 +10,10 @@ import (
 	"grpc-common/exchange/types/order"
 )
 
+
 type OrderServer struct {
 	svcCtx *svc.ServiceContext
-	order.UnimplementedOrderServer
+	order.UnimplementedOrderServiceServer
 }
 
 func NewOrderServer(svcCtx *svc.ServiceContext) *OrderServer {
@@ -22,18 +23,28 @@ func NewOrderServer(svcCtx *svc.ServiceContext) *OrderServer {
 }
 
 func (o *OrderServer) GetHistoryOrder(ctx context.Context, req *order.OrderReq) (*order.OrderResp, error) {
-	l := logic.NewOrderLogic(ctx, o.svcCtx)
+	l := logic.NewGetOrdersLogic(ctx, o.svcCtx)
 	return l.GetHistoryOrder(req)
 }
 
 func (o *OrderServer) GetCurrentOrder(ctx context.Context, req *order.OrderReq) (*order.OrderResp, error) {
-	l := logic.NewOrderLogic(ctx, o.svcCtx)
+	l := logic.NewGetOrdersLogic(ctx, o.svcCtx)
 	return l.GetCurrentOrder(req)
 }
 
 func (o *OrderServer) AddOrder(ctx context.Context, req *order.OrderReq) (*order.AddOrderResp, error) {
 	l := logic.NewOrderLogic(ctx, o.svcCtx)
 	return l.AddOrder(req)
+}
+
+func(o *OrderServer) CreateOrder(ctx context.Context, req *order.CreateOrderRequest) (*order.AddOrderResp, error) {
+	l := logic.NewCreateOrderLogic(ctx, o.svcCtx)
+	return l.CreateOrder(req)
+}
+
+func (o *OrderServer) CreateOrderRevert(ctx context.Context, req *order.CreateOrderRequest) (*order.AddOrderResp, error) {
+	l := logic.NewCreateOrderLogic(ctx, o.svcCtx)
+	return l.CreateOrderRevert(req)
 }
 
 

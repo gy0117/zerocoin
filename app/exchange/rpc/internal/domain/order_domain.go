@@ -57,7 +57,7 @@ func (d *OrderDomain) AddOrder(
 	baseWallet *uclient.WalletResp,
 	coinWallet *uclient.WalletResp) (float64, error) {
 
-	order.Status = model.StatusInit
+	order.Status = model.OrderStatus_StatusInit
 	order.Time = time.Now().UnixMilli()
 	order.OrderId = tools.GenerateOrderId("eo")
 

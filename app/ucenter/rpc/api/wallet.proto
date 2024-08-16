@@ -5,6 +5,8 @@ package wallet;
 // protoc-gen-go 版本大于1.4.0，proto文件需要加上go_package，否则无法生成
 option go_package = "./wallet";
 
+message Empty {}
+
 message WalletReq {
   string coinName = 1;
   string ip = 2;
@@ -98,10 +100,37 @@ message AddressListResp {
   repeated string list = 1;
 }
 
+message FreezeUserAssetReq {
+  int64 uid = 1;
+  double money = 2;
+  string symbol = 3;
+}
+
+message DeductUserAssetReq {
+  int64 uid = 1;
+  double money = 2;
+  string symbol = 3;
+}
+
+message AddUserAssetReq {
+  int64 uid = 1;
+  double money = 2;
+  string symbol = 3;
+}
+
 service Wallet {
   rpc FindWalletBySymbol(WalletReq) returns(UserWallet);
   rpc FindWallet(WalletReq) returns(FindWalletResp);
   rpc ResetWalletAddress(WalletReq) returns(WalletResp);
   rpc GetAllTransactions(AssetReq) returns(UserTransactionListResp);
   rpc GetAddress(AssetReq) returns(AddressListResp);
+
+  // 冻结资产
+  rpc FreezeUserAsset(FreezeUserAssetReq) returns(Empty);
+  // 解冻资产
+  rpc UnFreezeUserAsset(FreezeUserAssetReq) returns(Empty);
+  // 扣减资产
+  rpc DeductUserAsset(DeductUserAssetReq) returns(Empty);
+  // 增加资产
+  rpc AddUserAsset(AddUserAssetReq) returns(Empty);
 }

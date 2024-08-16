@@ -1,20 +1,27 @@
 package model
 
-import "zero-common/enum"
+import (
+	"grpc-common/exchange/types/order"
+	"zero-common/enum"
+	"zero-common/tools"
+)
 
 const (
-	StatusTrading   = iota // 交易中
-	StatusCompleted        // 完成
-	StatusCanceled         // 取消
-	StatusOverTimed        // 超时
-	StatusInit
+	OrderStatus_Trading   = iota // 交易中
+	OrderStatus_Completed        // 完成
+	OrderStatus_Canceled         // 取消
+	OrderStatus_OverTimed        // 超时
+	OrderStatus_StatusInit
+
+	// 废弃 dtm回滚操作
+	OrderStatus_Wasted
 )
 
 var StatusMap = enum.Enum{
-	StatusTrading:   "TRADING",
-	StatusCompleted: "COMPLETED",
-	StatusCanceled:  "CANCELED",
-	StatusOverTimed: "OVERTIMED",
+	OrderStatus_Trading:   "TRADING",
+	OrderStatus_Completed: "COMPLETED",
+	OrderStatus_Canceled:  "CANCELED",
+	OrderStatus_OverTimed: "OVERTIMED",
 }
 
 const (
@@ -65,16 +72,32 @@ func (*ExchangeOrder) TableName() string {
 	return "exchange_order"
 }
 
-func NewOrder() *ExchangeOrder {
-	return &ExchangeOrder{}
+//func NewOrder() *ExchangeOrder {
+//	return &ExchangeOrder{}
+//}
+
+func NewExchangeOrder(req *order.CreateOrderRequest) *ExchangeOrder {
+	item := req.Item
+	newOrder := &ExchangeOrder{
+		UserId:     item.UserId,
+		Symbol:     item.Symbol,
+		Type:       TransferType(item.Type),
+		Direction:  TransferDirection(item.Direction),
+		BaseSymbol: req.GetBaseSymbol(),
+		CoinSymbol: req.GetCoinSymbol(),
+	}
+	if item.Type == MarketPrice {
+		newOrder.Price = 0
+	} else {
+		newOrder.Price = item.Price
+	}
+	newOrder.UseDiscount = "0"
+	newOrder.Amount = item.Amount
+	newOrder.OrderId = tools.GenerateOrderId("eo")
+	return newOrder
 }
 
 func TransferDirection(direction string) int {
-	//if direction == DirectionSell {
-	//	return DirectionSellInt
-	//}
-	//return DirectionBuyInt
-
 	for k, v := range DirectionMap {
 		if v == direction {
 			return k
@@ -84,11 +107,6 @@ func TransferDirection(direction string) int {
 }
 
 func TransferType(tp string) int {
-	//if tp == LimitPrice {
-	//	return LimitPriceInt
-	//}
-	//return MarketPriceInt
-
 	for k, v := range TypeMap {
 		if v == tp {
 			return k

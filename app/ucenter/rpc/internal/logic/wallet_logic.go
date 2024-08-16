@@ -2,17 +2,25 @@ package logic
 
 import (
 	"context"
+	"database/sql"
+	"fmt"
+	"github.com/dtm-labs/client/dtmcli"
+	"github.com/dtm-labs/client/dtmgrpc"
 	"github.com/jinzhu/copier"
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/logx"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"grpc-common/market/mclient"
 	"grpc-common/market/types/market"
 	"grpc-common/ucenter/types/wallet"
 	"time"
+	"ucenter-rpc/internal/config"
 	"ucenter-rpc/internal/domain"
 	"ucenter-rpc/internal/svc"
 	"ucenter-rpc/internal/verify"
 	"zero-common/btc"
+	"zero-common/dtmutil"
 	"zero-common/operate"
 	"zero-common/tools"
 	"zero-common/zerr"
@@ -193,4 +201,63 @@ func (l *WalletLogic) GetAddress(in *wallet.AssetReq) (*wallet.AddressListResp, 
 	return &wallet.AddressListResp{
 		List: address,
 	}, nil
+}
+
+func dbGet(c config.Config) *dtmutil.DB {
+	var dbConf = dtmcli.DBConf{
+		Driver:   c.Mysql.Driver,
+		Host:     c.Mysql.Host,
+		Port:     c.Mysql.Port,
+		User:     c.Mysql.User,
+		Password: c.Mysql.Password,
+		Db:       c.Mysql.Db,
+	}
+	return dtmutil.DbGet(dbConf)
+}
+
+// TODO
+func (l *WalletLogic) FreezeUserAsset(in *wallet.FreezeUserAssetReq) (*wallet.Empty, error) {
+	logx.Info("saga -> 冻结资产")
+	// TODO 需要吗？1. 根据orderId，查询订单状态，如果订单交易中，说明已经被处理了  感觉是不需要了
+
+	// 冻结
+	barrier, err := dtmgrpc.BarrierFromGrpc(l.ctx)
+	if err != nil {
+		return nil, errors.Wrap(status.Error(codes.Aborted, err.Error()), "freeze_asset_logic create barrier failed")
+	}
+	tx := dbGet(l.svcCtx.Config).DB.Begin()
+	//sourceTx := tx.Statement.ConnPool.(*gorm.PreparedStmtTX).Tx.(*sql.Tx)
+	sourceTx := tx.Statement.ConnPool.(*sql.Tx)
+
+	assetDomain := domain.NewAssetDomain(tx)
+	err = barrier.Call(sourceTx, func(tx1 *sql.Tx) error {
+		// 这里不需要判断symbol
+		err := assetDomain.Freeze(l.ctx, in.GetUid(), in.GetMoney(), in.GetSymbol())
+		if err != nil {
+			return fmt.Errorf("freeze user asset, req: %+v, err: %v", in, err)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	return &wallet.Empty{}, nil
+}
+
+// TODO
+func (l *WalletLogic) UnFreezeUserAsset(in *wallet.FreezeUserAssetReq) (*wallet.Empty, error) {
+	logx.Error("saga -> 解冻资产")
+	return &wallet.Empty{}, nil
+}
+
+// TODO
+func (l *WalletLogic) DeductUserAsset(in *wallet.DeductUserAssetReq) (*wallet.Empty, error) {
+	logx.Info("saga -> 扣减资产")
+	return &wallet.Empty{}, nil
+}
+
+// TODO
+func (l *WalletLogic) AddUserAsset(in *wallet.AddUserAssetReq) (*wallet.Empty, error) {
+	logx.Info("saga -> 增加资产")
+	return &wallet.Empty{}, nil
 }

@@ -5,6 +5,13 @@ import (
 	"exchange-rpc/internal/domain"
 	"exchange-rpc/internal/model"
 	"exchange-rpc/internal/svc"
+	"fmt"
+	"github.com/dtm-labs/client/dtmgrpc"
+	"zero-common/operate"
+
+	// 下面这行导入gozero的dtm驱动
+	//_ "github.com/dtm-labs/driver-gozero"
+
 	"github.com/jinzhu/copier"
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -13,7 +20,6 @@ import (
 	"grpc-common/ucenter/types/user"
 	"grpc-common/ucenter/types/wallet"
 	"time"
-	"zero-common/zerodb"
 	"zero-common/zerodb/tran"
 	"zero-common/zerr"
 )
@@ -50,84 +56,6 @@ func NewOrderLogic(ctx context.Context, svcCtx *svc.ServiceContext) *OrderLogic 
 		transaction: tran.NewTransaction(svcCtx.DB.Conn),
 		kafkaDomain: domain.NewKafkaDomain(svcCtx.KCli, orderDomain),
 	}
-}
-
-func (l *OrderLogic) GetHistoryOrder(in *order.OrderReq) (*order.OrderResp, error) {
-	ctx, cancel := context.WithTimeout(l.ctx, time.Second*10)
-	defer cancel()
-
-	exchangeOrders, total, err := l.orderDomain.GetHistoryOrder(ctx, in.GetSymbol(), in.GetUserId(), in.GetPage(), in.GetPageSize())
-	if err != nil {
-		return nil, errors.Wrapf(ErrGetHistoryOrder, "exchange-rpc getHistoryOrder, uid: %d, symbol: %s", in.GetUserId(), in.GetSymbol())
-	}
-
-	list := make([]*order.ExchangeOrder, len(exchangeOrders))
-	for i, v := range exchangeOrders {
-		list[i] = &order.ExchangeOrder{
-			Id:            v.Id,
-			OrderId:       v.OrderId,
-			Amount:        v.Amount,
-			BaseSymbol:    v.BaseSymbol,
-			CanceledTime:  v.CanceledTime,
-			CoinSymbol:    v.CoinSymbol,
-			CompletedTime: v.CompletedTime,
-			Direction:     model.DirectionMap.Value(v.Direction),
-			UserId:        v.UserId,
-			Price:         v.Price,
-			Status:        int32(v.Status),
-			Symbol:        v.Symbol,
-			Time:          v.Time,
-			TradedAmount:  v.TradedAmount,
-			Turnover:      v.Turnover,
-			Type:          model.TypeMap.Value(v.Type),
-			UseDiscount:   v.UseDiscount,
-		}
-	}
-
-	resp := &order.OrderResp{
-		List:  list,
-		Total: total,
-	}
-	return resp, nil
-}
-
-func (l *OrderLogic) GetCurrentOrder(in *order.OrderReq) (*order.OrderResp, error) {
-	ctx, cancel := context.WithTimeout(l.ctx, time.Second*10)
-	defer cancel()
-
-	exchangeOrders, total, err := l.orderDomain.GetCurrentOrder(ctx, in.GetSymbol(), in.GetUserId(), in.GetPage(), in.GetPageSize())
-	if err != nil {
-		return nil, errors.Wrapf(ErrGetCurrentOrder, "exchange-rpc uid: %d, symbol: %s", in.GetUserId(), in.GetSymbol())
-	}
-
-	list := make([]*order.ExchangeOrder, len(exchangeOrders))
-	for i, v := range exchangeOrders {
-		list[i] = &order.ExchangeOrder{
-			Id:            v.Id,
-			OrderId:       v.OrderId,
-			Amount:        v.Amount,
-			BaseSymbol:    v.BaseSymbol,
-			CanceledTime:  v.CanceledTime,
-			CoinSymbol:    v.CoinSymbol,
-			CompletedTime: v.CompletedTime,
-			Direction:     model.DirectionMap.Value(v.Direction),
-			UserId:        v.UserId,
-			Price:         v.Price,
-			Status:        int32(v.Status),
-			Symbol:        v.Symbol,
-			Time:          v.Time,
-			TradedAmount:  v.TradedAmount,
-			Turnover:      v.Turnover,
-			Type:          model.TypeMap.Value(v.Type),
-			UseDiscount:   v.UseDiscount,
-		}
-	}
-
-	resp := &order.OrderResp{
-		List:  list,
-		Total: total,
-	}
-	return resp, nil
 }
 
 // 发布委托：就是创建订单，一旦发布，就需要冻结 钱和手续费
@@ -221,46 +149,97 @@ func (l *OrderLogic) AddOrder(req *order.OrderReq) (*order.AddOrderResp, error) 
 	// 7. 保存订单到数据库，发送消息到kafka，【ucenter钱包服务】 接收到消息，进行资金的冻结
 	// 如果消息发送失败，则整体回滚
 
-	// 生成订单
-	newOrder := model.NewOrder()
-	newOrder.UserId = req.UserId
-	newOrder.Symbol = req.Symbol
-	newOrder.Type = model.TransferType(req.Type)
-	newOrder.Direction = model.TransferDirection(req.Direction)
-	newOrder.BaseSymbol = exchangeCoinResp.GetBaseSymbol()
-	newOrder.CoinSymbol = exchangeCoinResp.GetCoinSymbol()
-
-	// 市价：会以当前市场价格快速成交，这个价格是变动的，表中不会记录
-	// 限价：用户自己输入的，用户自己的期望价格
-	if req.Type == model.MarketPrice {
-		newOrder.Price = 0
-	} else {
-		newOrder.Price = req.Price
-	}
-	newOrder.UseDiscount = "0"
-	newOrder.Amount = req.Amount
-
-	err = l.transaction.Action(func(conn zerodb.DbConn) error {
-		// 1. 提交订单
-		money, err := l.orderDomain.AddOrder(ctx, conn, newOrder, baseSymbolWalletResp, coinSymbolWalletResp)
-		if err != nil {
-			return errors.Wrapf(ErrAddOrder, "exchange-rpc addOrder, order: %v", newOrder)
-		}
-		// 2. 发送消息到kafka，冻结钱包服务的消息
-		err = l.kafkaDomain.SendOrderAdd(topicAddExchangeOrder, req.UserId, newOrder.OrderId, money, req.Symbol, newOrder.Direction, exchangeCoinResp.GetBaseSymbol(), exchangeCoinResp.GetCoinSymbol())
-		if err != nil {
-			return errors.Wrapf(ErrAddOrder,
-				"exchange-rpc the order message failed to send, uid: %d, orderId: %s, money: %f, symbol: %s, direction: %d", req.UserId, newOrder.OrderId, money, req.Symbol, newOrder.Direction)
-		}
-		return nil
-	})
+	logx.Info("=============开始dtm")
+	// DTM 改造
+	dtmServer, err := l.svcCtx.Config.DtmConf.BuildTarget()
 	if err != nil {
+		return nil, errors.Wrapf(ErrAddOrder, "get dtm server failed, err: %v", err)
+	}
+	logx.Info("dtmServer -> ", dtmServer)
+	gid := dtmgrpc.MustGenGid(dtmServer)
+	logx.Info("gid -> ", gid)
+	dtmSaga := dtmgrpc.NewSagaGrpc(dtmServer, gid)
+
+	orderTarget, err := buildTarget(l.svcCtx)
+	if err != nil {
+		return nil, errors.Wrapf(ErrAddOrder, "create order failed, err: %v", err)
+	}
+	accountTarget, err := l.svcCtx.Config.UCenter.BuildTarget()
+	if err != nil {
+		return nil, errors.Wrapf(ErrAddOrder, "create order failed, err: %v", err)
+	}
+
+	var createOrderAddr = orderTarget + "/order.OrderService/CreateOrder"
+	var createOrderRevertAddr = orderTarget + "/order.OrderService/CreateOrderRevert"
+	var freezeUserWalletAddr = accountTarget + "/wallet.Wallet/FreezeUserAsset"
+	var freezeUserWalletRevertAddr = accountTarget + "/wallet.Wallet/UnFreezeUserAsset"
+
+	logx.Info("createOrderAddr: ", createOrderAddr)
+	logx.Info("createOrderRevertAddr: ", createOrderRevertAddr)
+	logx.Info("freezeUserWalletAddr: ", freezeUserWalletAddr)
+	logx.Info("freezeUserWalletRevertAddr: ", freezeUserWalletRevertAddr)
+
+	// TODO 两个参数的处理
+
+	item := &order.CreateOrderItem{
+		UserId:      req.UserId,
+		Symbol:      req.Symbol,
+		Price:       req.Price,
+		Amount:      req.Amount,
+		Direction:   req.Direction,
+		Type:        req.Type,
+		UseDiscount: req.UseDiscount,
+		OrderId:     req.OrderId,
+	}
+	createOrderRequest := &order.CreateOrderRequest{
+		Item:        item,
+		BaseSymbol:  exchangeCoinResp.GetBaseSymbol(),
+		BaseBalance: baseSymbolWalletResp.GetBalance(),
+		CoinSymbol:  exchangeCoinResp.GetCoinSymbol(),
+		CoinBalance: coinSymbolWalletResp.GetBalance(),
+	}
+
+	var money float64
+	var symbol string
+	if item.Direction == model.DirectionBuy {
+		symbol = exchangeCoinResp.GetBaseSymbol()
+		if item.Type == model.MarketPrice {
+			money = item.Amount
+		} else {
+			money = operate.FloorFloat(item.Price*item.Amount, 8)
+		}
+	} else {
+		symbol = exchangeCoinResp.GetCoinSymbol()
+		// 卖出，卖出btc，钱就是个数
+		money = item.Amount
+	}
+
+	freezeRequest := &wallet.FreezeUserAssetReq{
+		Uid:    req.UserId,
+		Money:  money,
+		Symbol: symbol,
+	}
+
+	saga := dtmSaga.Add(createOrderAddr, createOrderRevertAddr, createOrderRequest).Add(freezeUserWalletAddr, freezeUserWalletRevertAddr, freezeRequest)
+	err = saga.Submit()
+	if err != nil {
+		logx.Error("saga, err: ", err)
 		return nil, err
 	}
+	logx.Info("DTM改造成功")
 
-	return &order.AddOrderResp{
-		OrderId: newOrder.OrderId,
-	}, nil
+	return &order.AddOrderResp{}, nil
+}
+
+func buildTarget(ctx *svc.ServiceContext) (string, error) {
+	etcd := ctx.Config.Etcd
+	if len(etcd.Hosts) == 0 {
+		return "", errors.New("build target failed")
+	}
+	host := etcd.Hosts[0]
+	key := etcd.Key
+	target := fmt.Sprintf("etcd://%s/%s", host, key)
+	return target, nil
 }
 
 func (l *OrderLogic) FindByOrderId(req *order.OrderReq) (*order.ExchangeOrder, error) {

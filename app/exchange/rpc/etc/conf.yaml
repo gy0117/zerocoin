@@ -5,7 +5,13 @@ Etcd:
   - 127.0.0.1:2379
   Key: exchange.rpc
 Mysql:
-  DataSource: root:root@tcp(127.0.0.1:3309)/zerocoin_exchange?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+  DataSource: root:123456@tcp(127.0.0.1:3306)/zerocoin_exchange?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+  Driver: "mysql"
+  Host: 127.0.0.1
+  Port: 3306
+  User: root
+  Password: "123456"
+  Db: zerocoin_exchange
 CacheRedis:
   - Host: 127.0.0.1:6379
     Type: node
@@ -35,3 +41,9 @@ LogConfig:
   Mode: console
   Encoding: plain
   Stat: false
+DtmConf:
+  Etcd:
+    Key: dtmservice
+    Hosts:
+      - 127.0.0.1:2379
+  NonBlock: true

@@ -1,6 +1,8 @@
 package zerr
 
-import "fmt"
+import (
+	"fmt"
+)
 
 var _ error = (*CodeError)(nil)
 

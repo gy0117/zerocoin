@@ -1,75 +1,98 @@
 version: '3'
-networks:
-  backend:
-    driver: ${NETWORKS_DRIVER}
-
 services:
   mysql:
+    container_name: mysql8
     image: mysql:${MYSQL_VERSION}
-    container_name: mysql
     restart: always
-    environment:
-      - TZ=${TZ}
-      - MYSQL_USER=${MYSQL_USERNAME}                  # 设置 Mysql 用户名称
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}              # 设置 Mysql 用户密码
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}    # 设置 Mysql root 用户密码
-    privileged: true
-    volumes:
-      - ${DATA_PATH_HOST}/mysql:/var/lib/mysql        # 引用 .env 配置中 DATA_PATH_HOST 变量，将宿主机上存放 Mysql 数据的目录挂载到容器中 /var/lib/mysql 目录
     ports:
-      - "${MYSQL_PORT}:3306"                          # 设置容器3306端口映射指定宿主机端口
-    networks:
-      - backend
+      - 3309:3306
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: saga
+      MYSQL_USER: saga
+      MYSQL_PASSWORD: saga
+    volumes:
+      - ${MYSQL_DIR}/data:/var/lib/mysql
+      - ${MYSQL_DIR}/conf:/etc/mysql/conf.d/
+      - ${MYSQL_DIR}/logs:/logs
+    command:
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+      --explicit_defaults_for_timestamp=true
+      --lower_case_table_names=1
+#    networks:
+#      - dtm-network
 
-  redis:
-    image: redis:${REDIS_VERSION}
+  Redis:
     container_name: redis
+    image: redis:${REDIS_VERSION}
+    restart: always
+    volumes:
+      - ${REDIS_DIR}/data:/data
+      - ${REDIS_DIR}/conf/redis.conf:/etc/redis/redis.conf
+    ports:
+      - ${REDIS_PORT}:6379
+    command: redis-server /etc/redis/redis.conf
+#    networks:
+#      - dtm-network
+
+
+  Etcd:
+    container_name: etcd
+    image: bitnami/etcd:${ETCD_VERSION}
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
     environment:
-      - TZ=${TZ}
+      - ALLOW_NONE_AUTHENTICATION=yes
     privileged: true
     volumes:
-      - ${DATA_PATH_HOST}/redis:/data  # 将宿主机上存放redis数据的目录挂载到容器中
+      - ${ETCD_DIR}/data:/bitnami/etcd/data
     ports:
-      - "${REDIS_PORT}:6379"
-    restart: always
-    networks:
-      - backend
+      - ${ETCD_PORT}:2379
+      - 2380:2380
+#    networks:
+#      - dtm-network
 
   mongo:
-    image: mongo:${MONGO_VERSION}
-    container_name: mongo
+    image: mongo:4.2.1
     restart: always
+    container_name: mongo
     ports:
-      - "${MONGO_PORT}:27017"
+      - 27018:27017
     volumes:
       - ${MONGO_DIR}/db:/data/db # 挂载数据目录
       - ${MONGO_DIR}/log:/var/log/mongodb  # 挂载日志目录
     privileged: true  # 设置容器的权限为root
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
-    networks:
-      - backend
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root123
+#    networks:
+#      - dtm-network
 
 
   zookeeper:
     image: docker.io/bitnami/zookeeper:3.8
     container_name: zookeeper
     ports:
-      - "${ZK_PORT}:2181"
+      - "2181:2181"
     volumes:
       - ${ZK_DIR}/bitnami:/bitnami
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes # 匿名登录
-    networks:
-      - backend
+#    networks:
+#      - dtm-network
+
 
   kafka:
     image: docker.io/bitnami/kafka:3.4
     container_name: kafka
     ports: #记得在防火墙开放端口
-      - "${KAFKA_PORT_1}:9092"
-      - "${KAFKA_PORT_2}:9093"
+      - "9092:9092"
+      - "9093:9093"
     volumes:
       - ${KAFKA_DIR}/bitnami:/bitnami
     environment:
@@ -81,9 +104,28 @@ services:
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
     depends_on:
       - zookeeper
-    networks:
-      - backend
+#    networks:
+#      - dtm-network
 
+  dtm:
+    build:
+      context: ./dtm
+    image: yedf/dtm
+    container_name: dtm
+    restart: always
+#    environment:
+#      STORE_DRIVER: mysql
+#      STORE_HOST: '192.168.0.101'
+#      STORE_USER: root
+#      STORE_PASSWORD: 'root'
+#      STORE_PORT: 3309
+    volumes:
+      - ./dtm/config111.yml:/app/dtm/config111.yml
+    ports:
+      - '36789:36789'
+      - '36790:36790'
+    depends_on:
+      - Etcd
 
 
 
@@ -147,3 +189,7 @@ services:
 #      - "5601:5601"
 #    depends_on:
 #      - elasticsearch
+
+#networks:
+#  dtm-network:
+#    driver: bridge

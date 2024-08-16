@@ -5,7 +5,6 @@ import (
 	"exchange-api/internal/handler"
 	"exchange-api/internal/svc"
 	"flag"
-	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
 	"net/http"
@@ -38,7 +37,7 @@ func main() {
 	group := service.NewServiceGroup()
 	group.Add(server)
 
-	fmt.Printf("Starting api server at %s:%d...\n", c.Host, c.Port)
+	logx.Infof("Starting api server at %s:%d...", c.Host, c.Port)
 
 	group.Start()
 }

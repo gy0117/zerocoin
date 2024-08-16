@@ -54,10 +54,40 @@ message CancelOrderResp {
   string orderId = 1;
 }
 
-service Order {
-  rpc GetHistoryOrder(OrderReq) returns(OrderResp);
-  rpc GetCurrentOrder(OrderReq) returns(OrderResp);
+// 下单请求
+message CreateOrderItem {
+  int64 userId = 1;
+  string symbol = 2;  // 交易对
+  double price = 3;  // 价格
+  double amount = 4;  // 下单数量
+  string direction = 5;  // 订单方向 买入 或 卖出
+  string type = 6;   // 订单类型 市价单 或者 限价单
+  int32 useDiscount = 7;  // 是否使用折扣
+  string orderId = 8;    // 订单id
+}
+
+message CreateOrderRequest {
+    CreateOrderItem item = 1;
+    string baseSymbol = 2;
+    string coinSymbol = 3;
+    double baseBalance = 4;
+    double coinBalance = 5;
+}
+
+
+service OrderService {
+  // 下单，内部使用dtm，createOrder、createOrderRevert、账户服务
   rpc AddOrder(OrderReq) returns(AddOrderResp);
-  rpc FindByOrderId(OrderReq) returns(ExchangeOrder);
+  // 创建订单
+  rpc CreateOrder(CreateOrderRequest) returns(AddOrderResp);
+  // 创建订单补偿
+  rpc CreateOrderRevert(CreateOrderRequest) returns(AddOrderResp);
+  // 取消订单
   rpc CancelOrder(OrderReq) returns(CancelOrderResp);
+  // 获取用户历史订单列表
+  rpc GetHistoryOrder(OrderReq) returns(OrderResp);
+  // 获取用户当前订单列表
+  rpc GetCurrentOrder(OrderReq) returns(OrderResp);
+  // 查询订单
+  rpc FindByOrderId(OrderReq) returns(ExchangeOrder);
 }

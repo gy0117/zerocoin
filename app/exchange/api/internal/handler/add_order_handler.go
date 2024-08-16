@@ -20,7 +20,7 @@ func AddOrder(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 		if !req.IsValid() {
-			result.ParamErrorResult(w, r, errors.New("订单参数错误"))
+			result.ParamErrorResult(w, r, errors.New("order params error"))
 			return
 		}
 		req.Ip = tools.GetRemoteClientIp(r)

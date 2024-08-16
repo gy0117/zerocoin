@@ -6,7 +6,6 @@ package server
 import (
 	"context"
 	"grpc-common/ucenter/types/wallet"
-
 	"ucenter-rpc/internal/logic"
 	"ucenter-rpc/internal/svc"
 )
@@ -47,4 +46,21 @@ func (s *WalletServer) GetAllTransactions(ctx context.Context, in *wallet.AssetR
 func (s *WalletServer) GetAddress(ctx context.Context, in *wallet.AssetReq) (*wallet.AddressListResp, error) {
 	l := logic.NewWalletLogic(ctx, s.svcCtx)
 	return l.GetAddress(in)
+}
+
+func (s *WalletServer) FreezeUserAsset(ctx context.Context, in *wallet.FreezeUserAssetReq) (*wallet.Empty, error) {
+	l := logic.NewWalletLogic(ctx, s.svcCtx)
+	return l.FreezeUserAsset(in)
+}
+func (s *WalletServer) UnFreezeUserAsset(ctx context.Context, in *wallet.FreezeUserAssetReq) (*wallet.Empty, error) {
+	l := logic.NewWalletLogic(ctx, s.svcCtx)
+	return l.UnFreezeUserAsset(in)
+}
+func (s *WalletServer) DeductUserAsset(ctx context.Context, in *wallet.DeductUserAssetReq) (*wallet.Empty, error) {
+	l := logic.NewWalletLogic(ctx, s.svcCtx)
+	return l.DeductUserAsset(in)
+}
+func (s *WalletServer) AddUserAsset(ctx context.Context, in *wallet.AddUserAssetReq) (*wallet.Empty, error) {
+	l := logic.NewWalletLogic(ctx, s.svcCtx)
+	return l.AddUserAsset(in)
 }
