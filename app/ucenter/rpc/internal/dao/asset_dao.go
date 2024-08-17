@@ -35,3 +35,16 @@ func (ad *AssetDao) Freeze(ctx context.Context, uid int64, money float64, symbol
 	}
 	return nil
 }
+
+func (ad *AssetDao) Unfreeze(ctx context.Context, uid int64, money float64, symbol string) interface{} {
+	sql := "update user_wallet set balance=balance+?, frozen_balance=frozen_balance-? where user_id=? and coin_name=?"
+	exec := ad.db.Model(&model.UserWallet{}).Exec(sql, money, money, uid, symbol)
+	err := exec.Error
+	if err != nil {
+		return err
+	}
+	if exec.RowsAffected <= 0 {
+		return errors.New("there is no data to update")
+	}
+	return nil
+}

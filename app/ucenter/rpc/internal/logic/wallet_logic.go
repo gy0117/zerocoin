@@ -215,7 +215,6 @@ func dbGet(c config.Config) *dtmutil.DB {
 	return dtmutil.DbGet(dbConf)
 }
 
-// TODO
 func (l *WalletLogic) FreezeUserAsset(in *wallet.FreezeUserAssetReq) (*wallet.Empty, error) {
 	logx.Info("saga -> 冻结资产")
 	// TODO 需要吗？1. 根据orderId，查询订单状态，如果订单交易中，说明已经被处理了  感觉是不需要了
@@ -244,9 +243,26 @@ func (l *WalletLogic) FreezeUserAsset(in *wallet.FreezeUserAssetReq) (*wallet.Em
 	return &wallet.Empty{}, nil
 }
 
-// TODO
+// 将冻结的钱还原回去
 func (l *WalletLogic) UnFreezeUserAsset(in *wallet.FreezeUserAssetReq) (*wallet.Empty, error) {
-	logx.Error("saga -> 解冻资产")
+	logx.Info("saga -> 解冻资产")
+	barrier, err := dtmgrpc.BarrierFromGrpc(l.ctx)
+	if err != nil {
+		return nil, errors.Wrap(status.Error(codes.Aborted, err.Error()), "unfreeze asset create barrier failed")
+	}
+	tx := dbGet(l.svcCtx.Config).DB.Begin()
+	sourceTx := tx.Statement.ConnPool.(*sql.Tx)
+	asssetDomain := domain.NewAssetDomain(tx)
+	err = barrier.Call(sourceTx, func(tx1 *sql.Tx) error {
+		err := asssetDomain.UnFreeze(l.ctx, in.GetUid(), in.GetMoney(), in.GetSymbol())
+		if err != nil {
+			return fmt.Errorf("unfreeze user asset failed, req: %+v, err: %v", in, err)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	return &wallet.Empty{}, nil
 }
 

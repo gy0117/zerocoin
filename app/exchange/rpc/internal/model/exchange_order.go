@@ -3,7 +3,6 @@ package model
 import (
 	"grpc-common/exchange/types/order"
 	"zero-common/enum"
-	"zero-common/tools"
 )
 
 const (
@@ -93,7 +92,8 @@ func NewExchangeOrder(req *order.CreateOrderRequest) *ExchangeOrder {
 	}
 	newOrder.UseDiscount = "0"
 	newOrder.Amount = item.Amount
-	newOrder.OrderId = tools.GenerateOrderId("eo")
+	//newOrder.OrderId = tools.GenerateOrderId("eo")
+	newOrder.OrderId = item.OrderId
 	return newOrder
 }
 

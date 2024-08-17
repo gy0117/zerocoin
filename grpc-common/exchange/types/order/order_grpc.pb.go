@@ -19,13 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	OrderService_AddOrder_FullMethodName          = "/order.OrderService/AddOrder"
-	OrderService_CreateOrder_FullMethodName       = "/order.OrderService/CreateOrder"
-	OrderService_CreateOrderRevert_FullMethodName = "/order.OrderService/CreateOrderRevert"
-	OrderService_CancelOrder_FullMethodName       = "/order.OrderService/CancelOrder"
-	OrderService_GetHistoryOrder_FullMethodName   = "/order.OrderService/GetHistoryOrder"
-	OrderService_GetCurrentOrder_FullMethodName   = "/order.OrderService/GetCurrentOrder"
-	OrderService_FindByOrderId_FullMethodName     = "/order.OrderService/FindByOrderId"
+	OrderService_AddOrder_FullMethodName              = "/order.OrderService/AddOrder"
+	OrderService_CreateOrder_FullMethodName           = "/order.OrderService/CreateOrder"
+	OrderService_CreateOrderRevert_FullMethodName     = "/order.OrderService/CreateOrderRevert"
+	OrderService_CancelOrder_FullMethodName           = "/order.OrderService/CancelOrder"
+	OrderService_GetHistoryOrder_FullMethodName       = "/order.OrderService/GetHistoryOrder"
+	OrderService_GetCurrentOrder_FullMethodName       = "/order.OrderService/GetCurrentOrder"
+	OrderService_FindByOrderId_FullMethodName         = "/order.OrderService/FindByOrderId"
+	OrderService_SendOrder2Plate_FullMethodName       = "/order.OrderService/SendOrder2Plate"
+	OrderService_SendOrder2PlateRevert_FullMethodName = "/order.OrderService/SendOrder2PlateRevert"
 )
 
 // OrderServiceClient is the client API for OrderService service.
@@ -46,6 +48,10 @@ type OrderServiceClient interface {
 	GetCurrentOrder(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderResp, error)
 	// 查询订单
 	FindByOrderId(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*ExchangeOrder, error)
+	// 将订单发送到买卖盘
+	SendOrder2Plate(ctx context.Context, in *SendOrderRequest, opts ...grpc.CallOption) (*Empty, error)
+	// 撤销 将订单发送到买卖盘
+	SendOrder2PlateRevert(ctx context.Context, in *SendOrderRequest, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type orderServiceClient struct {
@@ -119,6 +125,24 @@ func (c *orderServiceClient) FindByOrderId(ctx context.Context, in *OrderReq, op
 	return out, nil
 }
 
+func (c *orderServiceClient) SendOrder2Plate(ctx context.Context, in *SendOrderRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, OrderService_SendOrder2Plate_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *orderServiceClient) SendOrder2PlateRevert(ctx context.Context, in *SendOrderRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, OrderService_SendOrder2PlateRevert_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrderServiceServer is the server API for OrderService service.
 // All implementations must embed UnimplementedOrderServiceServer
 // for forward compatibility
@@ -137,6 +161,10 @@ type OrderServiceServer interface {
 	GetCurrentOrder(context.Context, *OrderReq) (*OrderResp, error)
 	// 查询订单
 	FindByOrderId(context.Context, *OrderReq) (*ExchangeOrder, error)
+	// 将订单发送到买卖盘
+	SendOrder2Plate(context.Context, *SendOrderRequest) (*Empty, error)
+	// 撤销 将订单发送到买卖盘
+	SendOrder2PlateRevert(context.Context, *SendOrderRequest) (*Empty, error)
 	mustEmbedUnimplementedOrderServiceServer()
 }
 
@@ -164,6 +192,12 @@ func (UnimplementedOrderServiceServer) GetCurrentOrder(context.Context, *OrderRe
 }
 func (UnimplementedOrderServiceServer) FindByOrderId(context.Context, *OrderReq) (*ExchangeOrder, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FindByOrderId not implemented")
+}
+func (UnimplementedOrderServiceServer) SendOrder2Plate(context.Context, *SendOrderRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendOrder2Plate not implemented")
+}
+func (UnimplementedOrderServiceServer) SendOrder2PlateRevert(context.Context, *SendOrderRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendOrder2PlateRevert not implemented")
 }
 func (UnimplementedOrderServiceServer) mustEmbedUnimplementedOrderServiceServer() {}
 
@@ -304,6 +338,42 @@ func _OrderService_FindByOrderId_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OrderService_SendOrder2Plate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendOrderRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderServiceServer).SendOrder2Plate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrderService_SendOrder2Plate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderServiceServer).SendOrder2Plate(ctx, req.(*SendOrderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OrderService_SendOrder2PlateRevert_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendOrderRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderServiceServer).SendOrder2PlateRevert(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrderService_SendOrder2PlateRevert_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderServiceServer).SendOrder2PlateRevert(ctx, req.(*SendOrderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // OrderService_ServiceDesc is the grpc.ServiceDesc for OrderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -338,6 +408,14 @@ var OrderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "FindByOrderId",
 			Handler:    _OrderService_FindByOrderId_Handler,
+		},
+		{
+			MethodName: "SendOrder2Plate",
+			Handler:    _OrderService_SendOrder2Plate_Handler,
+		},
+		{
+			MethodName: "SendOrder2PlateRevert",
+			Handler:    _OrderService_SendOrder2PlateRevert_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

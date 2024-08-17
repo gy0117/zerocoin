@@ -84,6 +84,7 @@ func (l *CreateOrderLogic) CreateOrder(createOrderReq *order.CreateOrderRequest)
 
 	// grpc order -> sql order
 	newOrder := model.NewExchangeOrder(createOrderReq)
+	newOrder.Status = model.OrderStatus_Trading
 
 	barrier, err := dtmgrpc.BarrierFromGrpc(l.ctx)
 	if err != nil {
@@ -108,8 +109,29 @@ func (l *CreateOrderLogic) CreateOrder(createOrderReq *order.CreateOrderRequest)
 	}, nil
 }
 
-// TODO
+// CreateOrderRevert 将订单设置成无效
 func (l *CreateOrderLogic) CreateOrderRevert(req *order.CreateOrderRequest) (*order.AddOrderResp, error) {
-	logx.Error("saga -> 创建订单回滚")
-	return &order.AddOrderResp{}, nil
+	logx.Info("saga -> 创建订单回滚")
+
+	barrier, err := dtmgrpc.BarrierFromGrpc(l.ctx)
+	if err != nil {
+		return nil, errors.Wrap(status.Error(codes.Aborted, err.Error()), "create order revert create barrier failed")
+	}
+	tx := dbGet(l.svcCtx.Config).DB.Begin()
+	sourceTx := tx.Statement.ConnPool.(*sql.Tx)
+	err = barrier.Call(sourceTx, func(tx1 *sql.Tx) error {
+		uid := req.Item.UserId
+		orderId := req.Item.OrderId
+		err = l.orderDomainV2.CreateOrderRevert(l.ctx, tx, uid, orderId, model.OrderStatus_Wasted)
+		if err != nil {
+			return fmt.Errorf("create order revert failed, uid: %d, orderId: %s, err: %v", uid, orderId, err)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	return &order.AddOrderResp{
+		OrderId: req.Item.OrderId,
+	}, nil
 }

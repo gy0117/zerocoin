@@ -57,3 +57,12 @@ func (o *OrderServer) CancelOrder(ctx context.Context, req *order.OrderReq) (*or
 	l := logic.NewOrderLogic(ctx, o.svcCtx)
 	return l.CancelOrder(req)
 }
+
+func (o *OrderServer) SendOrder2Plate(ctx context.Context, req *order.SendOrderRequest) (*order.Empty, error) {
+	l := logic.NewSend2PlateLogic(ctx, o.svcCtx)
+	return l.Send2Plate(req)
+}
+func (o *OrderServer) SendOrder2PlateRevert(ctx context.Context, req *order.SendOrderRequest) (*order.Empty, error) {
+	l := logic.NewSend2PlateLogic(ctx, o.svcCtx)
+	return l.Send2PlateRevert(req)
+}

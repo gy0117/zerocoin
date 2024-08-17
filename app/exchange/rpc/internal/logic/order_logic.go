@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/dtm-labs/client/dtmgrpc"
 	"zero-common/operate"
+	"zero-common/tools"
 
 	// 下面这行导入gozero的dtm驱动
 	//_ "github.com/dtm-labs/driver-gozero"
@@ -169,18 +170,21 @@ func (l *OrderLogic) AddOrder(req *order.OrderReq) (*order.AddOrderResp, error) 
 		return nil, errors.Wrapf(ErrAddOrder, "create order failed, err: %v", err)
 	}
 
-	var createOrderAddr = orderTarget + "/order.OrderService/CreateOrder"
-	var createOrderRevertAddr = orderTarget + "/order.OrderService/CreateOrderRevert"
-	var freezeUserWalletAddr = accountTarget + "/wallet.Wallet/FreezeUserAsset"
-	var freezeUserWalletRevertAddr = accountTarget + "/wallet.Wallet/UnFreezeUserAsset"
+	var createOrderAddr = orderTarget + order.OrderService_CreateOrder_FullMethodName
+	var createOrderRevertAddr = orderTarget + order.OrderService_CreateOrderRevert_FullMethodName
+	var freezeUserWalletAddr = accountTarget + wallet.Wallet_FreezeUserAsset_FullMethodName
+	var freezeUserWalletRevertAddr = accountTarget + wallet.Wallet_UnFreezeUserAsset_FullMethodName
+	var send2PlateAddr = orderTarget + order.OrderService_SendOrder2Plate_FullMethodName
+	var send2PlateRevertAddr = orderTarget + order.OrderService_SendOrder2PlateRevert_FullMethodName
 
 	logx.Info("createOrderAddr: ", createOrderAddr)
 	logx.Info("createOrderRevertAddr: ", createOrderRevertAddr)
 	logx.Info("freezeUserWalletAddr: ", freezeUserWalletAddr)
 	logx.Info("freezeUserWalletRevertAddr: ", freezeUserWalletRevertAddr)
+	logx.Info("send2PlateAddr: ", send2PlateAddr)
+	logx.Info("send2PlateRevertAddr: ", send2PlateRevertAddr)
 
-	// TODO 两个参数的处理
-
+	orderId := tools.GenerateOrderId("eo")
 	item := &order.CreateOrderItem{
 		UserId:      req.UserId,
 		Symbol:      req.Symbol,
@@ -189,7 +193,7 @@ func (l *OrderLogic) AddOrder(req *order.OrderReq) (*order.AddOrderResp, error) 
 		Direction:   req.Direction,
 		Type:        req.Type,
 		UseDiscount: req.UseDiscount,
-		OrderId:     req.OrderId,
+		OrderId:     orderId,
 	}
 	createOrderRequest := &order.CreateOrderRequest{
 		Item:        item,
@@ -220,14 +224,19 @@ func (l *OrderLogic) AddOrder(req *order.OrderReq) (*order.AddOrderResp, error) 
 		Symbol: symbol,
 	}
 
-	saga := dtmSaga.Add(createOrderAddr, createOrderRevertAddr, createOrderRequest).Add(freezeUserWalletAddr, freezeUserWalletRevertAddr, freezeRequest)
+	send2PlatRequest := &order.SendOrderRequest{
+		OrderId: orderId,
+	}
+
+	saga := dtmSaga.
+		Add(createOrderAddr, createOrderRevertAddr, createOrderRequest).
+		Add(freezeUserWalletAddr, freezeUserWalletRevertAddr, freezeRequest).
+		Add(send2PlateAddr, send2PlateRevertAddr, send2PlatRequest)
 	err = saga.Submit()
 	if err != nil {
 		logx.Error("saga, err: ", err)
 		return nil, err
 	}
-	logx.Info("DTM改造成功")
-
 	return &order.AddOrderResp{}, nil
 }
 

@@ -5,6 +5,9 @@ package order;
 // protoc-gen-go 版本大于1.4.0, proto文件需要加上go_package,否则无法生成
 option go_package = "./order";
 
+message Empty {
+}
+
 message OrderReq {
   string ip = 1;
   string symbol = 2;
@@ -74,6 +77,11 @@ message CreateOrderRequest {
     double coinBalance = 5;
 }
 
+message SendOrderRequest {
+  string orderId = 1;
+}
+
+
 
 service OrderService {
   // 下单，内部使用dtm，createOrder、createOrderRevert、账户服务
@@ -90,4 +98,8 @@ service OrderService {
   rpc GetCurrentOrder(OrderReq) returns(OrderResp);
   // 查询订单
   rpc FindByOrderId(OrderReq) returns(ExchangeOrder);
+  // 将订单发送到买卖盘
+  rpc SendOrder2Plate(SendOrderRequest) returns(Empty);
+  // 撤销 将订单发送到买卖盘
+  rpc SendOrder2PlateRevert(SendOrderRequest) returns(Empty);
 }

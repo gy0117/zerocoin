@@ -11,21 +11,27 @@ import (
 )
 
 type (
-	OrderReq  = order.OrderReq
-	OrderResp = order.OrderResp
-	AddOrderResp = order.AddOrderResp
-	ExchangeOrder = order.ExchangeOrder
-	CancelOrderResp = order.CancelOrderResp
+	OrderReq           = order.OrderReq
+	OrderResp          = order.OrderResp
+	AddOrderResp       = order.AddOrderResp
+	ExchangeOrder      = order.ExchangeOrder
+	CancelOrderResp    = order.CancelOrderResp
 	CreateOrderRequest = order.CreateOrderRequest
+	SendOrderRequest   = order.SendOrderRequest
+	Empty              = order.Empty
 
 	Order interface {
 		GetHistoryOrder(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderResp, error)
 		GetCurrentOrder(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderResp, error)
-		AddOrder(ctx context.Context, in *OrderReq, opts ...grpc.CallOption)(*AddOrderResp, error)
-		CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption)(*AddOrderResp, error)
-		CreateOrderRevert(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption)(*AddOrderResp, error)
+		AddOrder(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*AddOrderResp, error)
+		CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*AddOrderResp, error)
+		CreateOrderRevert(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*AddOrderResp, error)
 		FindByOrderId(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*ExchangeOrder, error)
 		CancelOrder(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*CancelOrderResp, error)
+		// 将订单发送到买卖盘
+		SendOrder2Plate(ctx context.Context, in *SendOrderRequest, opts ...grpc.CallOption) (*Empty, error)
+		// 撤销 将订单发送到买卖盘
+		SendOrder2PlateRevert(ctx context.Context, in *SendOrderRequest, opts ...grpc.CallOption) (*Empty, error)
 	}
 
 	defaultOrder struct {
@@ -48,7 +54,6 @@ func (o *defaultOrder) GetCurrentOrder(ctx context.Context, in *OrderReq, opts .
 	client := order.NewOrderServiceClient(o.cli.Conn())
 	return client.GetCurrentOrder(ctx, in, opts...)
 }
-
 
 func (o *defaultOrder) AddOrder(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*AddOrderResp, error) {
 	client := order.NewOrderServiceClient(o.cli.Conn())
@@ -73,4 +78,15 @@ func (o *defaultOrder) FindByOrderId(ctx context.Context, in *OrderReq, opts ...
 func (o *defaultOrder) CancelOrder(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*CancelOrderResp, error) {
 	client := order.NewOrderServiceClient(o.cli.Conn())
 	return client.CancelOrder(ctx, in, opts...)
+}
+
+
+func (o *defaultOrder) SendOrder2Plate(ctx context.Context, in *SendOrderRequest, opts ...grpc.CallOption) (*Empty, error) {
+	client := order.NewOrderServiceClient(o.cli.Conn())
+	return client.SendOrder2Plate(ctx, in, opts...)
+}
+
+func (o *defaultOrder) SendOrder2PlateRevert(ctx context.Context, in *SendOrderRequest, opts ...grpc.CallOption) (*Empty, error) {
+	client := order.NewOrderServiceClient(o.cli.Conn())
+	return client.SendOrder2PlateRevert(ctx, in, opts...)
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"exchange-rpc/internal/model"
+	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
 	"grpc-common/exchange/types/order"
 	"time"
@@ -124,5 +125,33 @@ func (d *KafkaDomain) WaitAddOrderResult() {
 			logx.Info("【exchange-rpc】订单状态修改成功 | 发送订单数据到撮合交易，orderId: ", string(orderData.Key))
 			break
 		}
+	}
+}
+
+func (kd *KafkaDomain) Send2Plate(orderId string) error {
+	logx.Info("exchange-rpc | KafkaDomain Send2Plate")
+	for {
+		// 查询订单
+		exchangeOrder, err := kd.orderDomain.FindByOrderId(context.Background(), &order.OrderReq{
+			OrderId: orderId,
+		})
+		if err != nil {
+			return fmt.Errorf("exchange-rpc.Send2Plate | 冻结成功后，开始修改订单状态 | FindByOrderId err：%v", err)
+		}
+		if exchangeOrder == nil {
+			return fmt.Errorf("exchange-rpc.Send2Plate | 订单不存在, orderId: %s", orderId)
+		}
+
+		// 需要发送消息到kafka，订单需要加入到撮合交易当中
+		// 如果没有撮合交易成功，加入到撮合交易等待队列，继续等待完成撮合
+		marshal, _ := json.Marshal(exchangeOrder)
+		logx.Info("exchange-rpc.Send2Plate | 发送到kafka：", string(marshal))
+
+		orderData := kafka.KafkaData{
+			Topic: topicExchangeOrderTrading,
+			Key:   []byte(exchangeOrder.OrderId),
+			Data:  marshal,
+		}
+		return kd.cli.SendSync(orderData)
 	}
 }
