@@ -1,0 +1,17 @@
+Clusters:
+  - Input:
+      Kafka:
+        Name: go-stash
+        Brokers:
+          - "192.168.0.101:9092"
+          - "192.168.0.101:9093"
+        Topics:
+          - zerocoin-log
+        Group: pro
+        Consumers: 16
+    Output:
+      Stdout:
+      ElasticSearch:
+        Hosts:
+          - "http://elasticsearch:9200"
+        Index: "zerocoin-{{yyyy-MM-dd}}"

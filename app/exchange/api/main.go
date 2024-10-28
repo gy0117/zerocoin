@@ -5,7 +5,6 @@ import (
 	"exchange-api/internal/handler"
 	"exchange-api/internal/svc"
 	"flag"
-	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
 	"net/http"
@@ -19,13 +18,9 @@ var configFile = flag.String("f", "etc/conf.yaml", "the config file")
 func main() {
 	flag.Parse()
 
-	logx.MustSetup(logx.LogConf{
-		Encoding: "plain",
-		Stat:     false,
-	})
-
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
+	logx.MustSetup(c.LogConfig)
 
 	server := rest.MustNewServer(
 		c.RestConf,
@@ -42,7 +37,7 @@ func main() {
 	group := service.NewServiceGroup()
 	group.Add(server)
 
-	fmt.Printf("Starting api server at %s:%d...\n", c.Host, c.Port)
+	logx.Infof("Starting api server at %s:%d...", c.Host, c.Port)
 
 	group.Start()
 }

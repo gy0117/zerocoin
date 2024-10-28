@@ -5,7 +5,13 @@ Etcd:
   - 127.0.0.1:2379
   Key: ucenter.rpc
 Mysql:
-  DataSource: root:root@tcp(127.0.0.1:3309)/zerocoin_ucenter?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+  DataSource: root:123456@tcp(127.0.0.1:3306)/zerocoin_ucenter?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+  Driver: mysql
+  Host: 127.0.0.1
+  Port: 3306
+  User: root
+  Password: "123456"
+  Db: zerocoin_ucenter
 CacheRedis:
   - Host: 127.0.0.1:6379
     Type: node
@@ -34,3 +40,8 @@ ExchangeRpc:
     Key: exchange.rpc
   NonBlock: true
 Mode: dev
+LogConfig:
+  ServiceName: ucenter-rpc
+  Mode: console
+  Encoding: plain
+  Stat: false

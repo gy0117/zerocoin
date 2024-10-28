@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
 	"net/http"
 	"ucenter-api/internal/config"
@@ -18,13 +17,9 @@ var configFile = flag.String("f", "etc/conf.yaml", "the config file")
 func main() {
 	flag.Parse()
 
-	logx.MustSetup(logx.LogConf{
-		Encoding: "plain",
-		Stat:     false,
-	})
-
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
+	logx.MustSetup(c.LogConfig)
 
 	server := rest.MustNewServer(c.RestConf, rest.WithCustomCors(func(header http.Header) {
 		header.Set("Access-Control-Allow-Headers", "DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,token,X-Auth-Token,x-auth-token")
@@ -35,6 +30,6 @@ func main() {
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
 
-	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
+	logx.Infof("Starting server at %s:%d...", c.Host, c.Port)
 	server.Start()
 }

@@ -24,6 +24,10 @@ const (
 	Wallet_ResetWalletAddress_FullMethodName = "/wallet.Wallet/ResetWalletAddress"
 	Wallet_GetAllTransactions_FullMethodName = "/wallet.Wallet/GetAllTransactions"
 	Wallet_GetAddress_FullMethodName         = "/wallet.Wallet/GetAddress"
+	Wallet_FreezeUserAsset_FullMethodName    = "/wallet.Wallet/FreezeUserAsset"
+	Wallet_UnFreezeUserAsset_FullMethodName  = "/wallet.Wallet/UnFreezeUserAsset"
+	Wallet_DeductUserAsset_FullMethodName    = "/wallet.Wallet/DeductUserAsset"
+	Wallet_AddUserAsset_FullMethodName       = "/wallet.Wallet/AddUserAsset"
 )
 
 // WalletClient is the client API for Wallet service.
@@ -35,6 +39,14 @@ type WalletClient interface {
 	ResetWalletAddress(ctx context.Context, in *WalletReq, opts ...grpc.CallOption) (*WalletResp, error)
 	GetAllTransactions(ctx context.Context, in *AssetReq, opts ...grpc.CallOption) (*UserTransactionListResp, error)
 	GetAddress(ctx context.Context, in *AssetReq, opts ...grpc.CallOption) (*AddressListResp, error)
+	// 冻结资产
+	FreezeUserAsset(ctx context.Context, in *FreezeUserAssetReq, opts ...grpc.CallOption) (*Empty, error)
+	// 解冻资产
+	UnFreezeUserAsset(ctx context.Context, in *FreezeUserAssetReq, opts ...grpc.CallOption) (*Empty, error)
+	// 扣减资产
+	DeductUserAsset(ctx context.Context, in *DeductUserAssetReq, opts ...grpc.CallOption) (*Empty, error)
+	// 增加资产
+	AddUserAsset(ctx context.Context, in *AddUserAssetReq, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type walletClient struct {
@@ -90,6 +102,42 @@ func (c *walletClient) GetAddress(ctx context.Context, in *AssetReq, opts ...grp
 	return out, nil
 }
 
+func (c *walletClient) FreezeUserAsset(ctx context.Context, in *FreezeUserAssetReq, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, Wallet_FreezeUserAsset_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *walletClient) UnFreezeUserAsset(ctx context.Context, in *FreezeUserAssetReq, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, Wallet_UnFreezeUserAsset_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *walletClient) DeductUserAsset(ctx context.Context, in *DeductUserAssetReq, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, Wallet_DeductUserAsset_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *walletClient) AddUserAsset(ctx context.Context, in *AddUserAssetReq, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, Wallet_AddUserAsset_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // WalletServer is the server API for Wallet service.
 // All implementations must embed UnimplementedWalletServer
 // for forward compatibility
@@ -99,6 +147,14 @@ type WalletServer interface {
 	ResetWalletAddress(context.Context, *WalletReq) (*WalletResp, error)
 	GetAllTransactions(context.Context, *AssetReq) (*UserTransactionListResp, error)
 	GetAddress(context.Context, *AssetReq) (*AddressListResp, error)
+	// 冻结资产
+	FreezeUserAsset(context.Context, *FreezeUserAssetReq) (*Empty, error)
+	// 解冻资产
+	UnFreezeUserAsset(context.Context, *FreezeUserAssetReq) (*Empty, error)
+	// 扣减资产
+	DeductUserAsset(context.Context, *DeductUserAssetReq) (*Empty, error)
+	// 增加资产
+	AddUserAsset(context.Context, *AddUserAssetReq) (*Empty, error)
 	mustEmbedUnimplementedWalletServer()
 }
 
@@ -120,6 +176,18 @@ func (UnimplementedWalletServer) GetAllTransactions(context.Context, *AssetReq) 
 }
 func (UnimplementedWalletServer) GetAddress(context.Context, *AssetReq) (*AddressListResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAddress not implemented")
+}
+func (UnimplementedWalletServer) FreezeUserAsset(context.Context, *FreezeUserAssetReq) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FreezeUserAsset not implemented")
+}
+func (UnimplementedWalletServer) UnFreezeUserAsset(context.Context, *FreezeUserAssetReq) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UnFreezeUserAsset not implemented")
+}
+func (UnimplementedWalletServer) DeductUserAsset(context.Context, *DeductUserAssetReq) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeductUserAsset not implemented")
+}
+func (UnimplementedWalletServer) AddUserAsset(context.Context, *AddUserAssetReq) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddUserAsset not implemented")
 }
 func (UnimplementedWalletServer) mustEmbedUnimplementedWalletServer() {}
 
@@ -224,6 +292,78 @@ func _Wallet_GetAddress_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Wallet_FreezeUserAsset_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FreezeUserAssetReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WalletServer).FreezeUserAsset(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Wallet_FreezeUserAsset_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WalletServer).FreezeUserAsset(ctx, req.(*FreezeUserAssetReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Wallet_UnFreezeUserAsset_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FreezeUserAssetReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WalletServer).UnFreezeUserAsset(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Wallet_UnFreezeUserAsset_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WalletServer).UnFreezeUserAsset(ctx, req.(*FreezeUserAssetReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Wallet_DeductUserAsset_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeductUserAssetReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WalletServer).DeductUserAsset(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Wallet_DeductUserAsset_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WalletServer).DeductUserAsset(ctx, req.(*DeductUserAssetReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Wallet_AddUserAsset_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddUserAssetReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WalletServer).AddUserAsset(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Wallet_AddUserAsset_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WalletServer).AddUserAsset(ctx, req.(*AddUserAssetReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Wallet_ServiceDesc is the grpc.ServiceDesc for Wallet service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -250,6 +390,22 @@ var Wallet_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAddress",
 			Handler:    _Wallet_GetAddress_Handler,
+		},
+		{
+			MethodName: "FreezeUserAsset",
+			Handler:    _Wallet_FreezeUserAsset_Handler,
+		},
+		{
+			MethodName: "UnFreezeUserAsset",
+			Handler:    _Wallet_UnFreezeUserAsset_Handler,
+		},
+		{
+			MethodName: "DeductUserAsset",
+			Handler:    _Wallet_DeductUserAsset_Handler,
+		},
+		{
+			MethodName: "AddUserAsset",
+			Handler:    _Wallet_AddUserAsset_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

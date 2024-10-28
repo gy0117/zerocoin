@@ -2,13 +2,13 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
 	"grpc-common/market/types/market"
 	"grpc-common/market/types/rate"
 	"market-rpc/internal/config"
 	"market-rpc/internal/server"
 	"market-rpc/internal/svc"
+	"zero-common/interceptor/rpcserver"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
@@ -22,13 +22,10 @@ var configFile = flag.String("f", "etc/conf.yaml", "the config file")
 func main() {
 	flag.Parse()
 
-	logx.MustSetup(logx.LogConf{
-		Encoding: "plain",
-		Stat:     false,
-	})
-
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
+	logx.MustSetup(c.LogConfig)
+
 	ctx := svc.NewServiceContext(c)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
@@ -39,8 +36,11 @@ func main() {
 			reflection.Register(grpcServer)
 		}
 	})
+	// rpc log
+	s.AddUnaryInterceptors(rpcserver.LoggerInterceptor)
+
 	defer s.Stop()
 
-	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
+	logx.Infof("Starting rpc server at %s...", c.ListenOn)
 	s.Start()
 }

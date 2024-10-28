@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
@@ -20,15 +19,9 @@ var configFile = flag.String("f", "etc/conf.yaml", "the config file")
 func main() {
 	flag.Parse()
 
-	logx.MustSetup(logx.LogConf{
-		Encoding:    "json",
-		Mode:        "file",
-		ServiceName: "market_api",
-		Path:        "logs",
-	})
-
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
+	logx.MustSetup(c.LogConfig)
 
 	wsServer := ws.NewWebSocketServer("/socket.io")
 
@@ -49,7 +42,7 @@ func main() {
 	group.Add(server)
 	group.Add(wsServer)
 
-	fmt.Printf("Starting api server at %s:%d...\n", c.Host, c.Port)
+	logx.Infof("Starting api server at %s:%d...", c.Host, c.Port)
 
 	group.Start()
 }
