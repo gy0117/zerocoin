@@ -10,4 +10,5 @@ use (
 	./app/market/rpc
 	./app/exchange/api
 	./app/exchange/rpc
+	./trade-engine
 )
