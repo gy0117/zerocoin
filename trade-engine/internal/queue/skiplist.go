@@ -37,22 +37,18 @@ func (slNode *SkipListNode) GetValue() NodeValue {
 	return slNode.value
 }
 
-// Next 第i层的下一个元素
 func (slNode *SkipListNode) Next(i int) *SkipListNode {
 	return slNode.level[i].forward
 }
 
-// SetNext 设置第i层的下一个元素
 func (slNode *SkipListNode) SetNext(i int, next *SkipListNode) {
 	slNode.level[i].forward = next
 }
 
-// Span 第i层的span值
 func (slNode *SkipListNode) Span(i int) int64 {
 	return slNode.level[i].span
 }
 
-// SetSpan 设置第i层的span
 func (slNode *SkipListNode) SetSpan(i int, span int64) {
 	slNode.level[i].span = span
 }
@@ -99,19 +95,15 @@ func (list *SkipList) Insert(score decimal.Decimal, value NodeValue) *SkipListNo
 		} else {
 			rank[i] = rank[i+1]
 		}
-		// 下个节点存在，并且下个节点的score小于等于score时(score相同，按时间排序)
 		for p.Next(i) != nil && p.Next(i).score.LessThanOrEqual(score) {
 			rank[i] += p.level[i].span
 			p = p.Next(i)
 		}
-		// 每一层最后一个小于给定score值的节点
 		update[i] = p
 	}
 
-	// 新节点将要在哪些索引出现
 	level := list.randLevel()
 
-	// 如果level大于当前跳表的最高索引，为高出来的索引层赋初始值
 	if level > list.level {
 		for i := list.level; i < level; i++ {
 			rank[i] = 0
@@ -130,17 +122,14 @@ func (list *SkipList) Insert(score decimal.Decimal, value NodeValue) *SkipListNo
 		update[i].SetSpan(i, rank[0]-rank[i]+1)
 	}
 
-	// 处理新增节点的span
 	for i := level; i < list.level; i++ {
 		update[i].level[i].span++
 	}
-	// 处理新增节点的后退指针
 	if update[0] == list.head {
 		newNode.backward = nil
 	} else {
 		newNode.backward = update[0]
 	}
-	// 判断新插入的节点是不是最后一个节点
 	if newNode.Next(0) != nil {
 		newNode.Next(0).backward = newNode
 	} else {

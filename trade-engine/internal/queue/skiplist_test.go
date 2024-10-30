@@ -10,6 +10,18 @@ type order struct {
 	Quantity decimal.Decimal
 }
 
+func (o *order) GetQuantity() decimal.Decimal {
+	return o.Quantity
+}
+
+func (o *order) GetUid() int64 {
+	return 0
+}
+
+func (o *order) SetQuantity(d decimal.Decimal) {
+
+}
+
 func (o *order) GetId() string {
 	return o.Id
 }

@@ -1,11 +1,18 @@
 # zerocoin
 
 
-### trade-engine   
-trade-engine模块实现了高效的撮合交易系统，专注于订单的撮合以及买卖盘的管理。
-外部通过grpc的方式调用，只需要传入撮合必需的字段，完成撮合后，将trade-tickets发送到kafka，下游服务订阅相关的topic，进行后续处理。
+### trade-engine
+The trade-engine module implements an efficient matching system, focused on order matching and order book management.
 
-特点：
-- 支持grpc调用
-- 使用跳表，实现bid和ask队列
-- 高内聚低耦合，内部专注于撮合交易和买卖盘管理
+The external system calls via gRPC, only needing to pass in the required fields for matching. Once matching is complete, trade tickets are sent to Kafka, where downstream services subscribe to relevant topics for further processing.
+
+
+Feature: 
+- High cohesion and low coupling, with a focus on internal trade matching and order book management
+- Supports gRPC calls
+- Use a skip list to implement bid and ask queues
+
+Improvements that can be added: 
+- [ ] Ability to cancel an order
+- [ ] Monitoring
+- [ ] Back up the order book in persistent storage

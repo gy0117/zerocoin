@@ -6,7 +6,7 @@ import (
 	"github.com/shopspring/decimal"
 	"log"
 	"time"
-	model2 "trade-engine/internal/model"
+	"trade-engine/internal/model"
 	"trade-engine/internal/queue"
 	"zero-common/kafka"
 )
@@ -21,7 +21,7 @@ type OrderBook struct {
 	ask        *queue.SkipList            //  卖出价，卖家出的价格。按从低到高的顺序排列
 	mBid       map[string]decimal.Decimal // bid的订单id对应的score
 	mAsk       map[string]decimal.Decimal // ask的订单id对应的score
-	chanAdd    chan model2.Order          // 异步处理挂单逻辑
+	chanAdd    chan model.Order           // 异步处理挂单逻辑
 	chanCancel chan string                // 异步处理撤单逻辑
 
 	kCli *kafka.KafkaClient
@@ -42,7 +42,7 @@ func NewOrderBook(tradePair string, kCli *kafka.KafkaClient) (*OrderBook, error)
 		ask:        ask,
 		mBid:       make(map[string]decimal.Decimal),
 		mAsk:       make(map[string]decimal.Decimal),
-		chanAdd:    make(chan model2.Order, maxOrderCap),
+		chanAdd:    make(chan model.Order, maxOrderCap),
 		chanCancel: make(chan string, maxOrderCap),
 		kCli:       kCli,
 	}, nil
@@ -64,7 +64,7 @@ func (orderBook *OrderBook) Start() {
 }
 
 // Add 挂单 异步
-func (orderBook *OrderBook) Add(order *model2.Order) error {
+func (orderBook *OrderBook) Add(order *model.Order) error {
 	fmt.Println("orderBook Add")
 	select {
 	case orderBook.chanAdd <- *order:
@@ -86,7 +86,7 @@ func (orderBook *OrderBook) Cancel(id string) error {
 }
 
 // PushTradeTickets 发送成交单
-func (orderBook *OrderBook) PushTradeTickets(trades ...model2.Trade) {
+func (orderBook *OrderBook) PushTradeTickets(trades ...model.Trade) {
 	marshal, _ := json.Marshal(trades)
 	kData := kafka.KafkaData{
 		Topic: topicTradeTickets,

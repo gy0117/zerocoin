@@ -3,12 +3,12 @@ package engine
 import (
 	"github.com/shopspring/decimal"
 	"time"
-	model2 "trade-engine/internal/model"
+	"trade-engine/internal/model"
 )
 
 // 挂单 限价单
-func (orderBook *OrderBook) handleBidLimit(order model2.Order) error {
-	trades := make([]model2.Trade, 0)
+func (orderBook *OrderBook) handleBidLimit(order model.Order) error {
+	trades := make([]model.Trade, 0)
 	for orderBook.ask.First() != nil &&
 		orderBook.ask.First().GetScore().LessThanOrEqual(order.Price) &&
 		order.Quantity.GreaterThan(decimal.Zero) {
@@ -18,7 +18,7 @@ func (orderBook *OrderBook) handleBidLimit(order model2.Order) error {
 
 		if nodeValue.GetQuantity().GreaterThanOrEqual(order.Quantity) {
 			// 全部吃掉order
-			trade := model2.Trade{
+			trade := model.Trade{
 				Id:             GenerateTradeId(),
 				TradePair:      order.TradePair,
 				MakerId:        nodeValue.GetId(),
@@ -42,7 +42,7 @@ func (orderBook *OrderBook) handleBidLimit(order model2.Order) error {
 			}
 		} else {
 			// 吃掉firstNode，order还剩余
-			trade := model2.Trade{
+			trade := model.Trade{
 				Id:             GenerateTradeId(),
 				TradePair:      order.TradePair,
 				MakerId:        nodeValue.GetId(),
@@ -73,8 +73,8 @@ func (orderBook *OrderBook) handleBidLimit(order model2.Order) error {
 }
 
 // 市价单
-func (orderBook *OrderBook) handleBidMarket(order model2.Order) error {
-	trades := make([]model2.Trade, 0)
+func (orderBook *OrderBook) handleBidMarket(order model.Order) error {
+	trades := make([]model.Trade, 0)
 	// 市价单不看对方价格，就要立即成交
 	for orderBook.ask.First() != nil && order.Quantity.GreaterThan(decimal.Zero) {
 		firstNode := orderBook.ask.First()
@@ -82,7 +82,7 @@ func (orderBook *OrderBook) handleBidMarket(order model2.Order) error {
 
 		if nodeValue.GetQuantity().GreaterThanOrEqual(order.Quantity) {
 			// 吃掉order
-			trade := model2.Trade{
+			trade := model.Trade{
 				Id:             GenerateTradeId(),
 				TradePair:      order.TradePair,
 				MakerId:        nodeValue.GetId(), // 挂单id
@@ -106,7 +106,7 @@ func (orderBook *OrderBook) handleBidMarket(order model2.Order) error {
 			}
 		} else {
 			// 吃掉firstNode
-			trade := model2.Trade{
+			trade := model.Trade{
 				Id:             GenerateTradeId(),
 				TradePair:      order.TradePair,
 				MakerId:        nodeValue.GetId(),
@@ -128,7 +128,7 @@ func (orderBook *OrderBook) handleBidMarket(order model2.Order) error {
 	// check order是否完成被吃掉
 	// TODO 具体看策略，应该加到市价单队列中 或者 推送出去
 	if order.Quantity.GreaterThan(decimal.Zero) {
-		trade := model2.Trade{
+		trade := model.Trade{
 			Id:             GenerateTradeId(),
 			TradePair:      order.TradePair,
 			MakerId:        order.Id,
@@ -138,7 +138,7 @@ func (orderBook *OrderBook) handleBidMarket(order model2.Order) error {
 			Price:          order.Price.String(),
 			Quantity:       order.Quantity.String(),
 			TakerOrderSide: order.Side.String(),
-			TakerOrderType: model2.CancelOrderStr,
+			TakerOrderType: model.CancelOrderStr,
 			Timestamp:      time.Now().UnixMilli(),
 		}
 		trades = append(trades, trade)

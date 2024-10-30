@@ -3,11 +3,11 @@ package engine
 import (
 	"github.com/shopspring/decimal"
 	"time"
-	model2 "trade-engine/internal/model"
+	"trade-engine/internal/model"
 )
 
-func (orderBook *OrderBook) handleAskLimit(order model2.Order) error {
-	trades := make([]model2.Trade, 0)
+func (orderBook *OrderBook) handleAskLimit(order model.Order) error {
+	trades := make([]model.Trade, 0)
 	for orderBook.bid.First() != nil &&
 		orderBook.bid.First().GetScore().GreaterThanOrEqual(order.Price) &&
 		order.Quantity.GreaterThan(decimal.Zero) {
@@ -16,7 +16,7 @@ func (orderBook *OrderBook) handleAskLimit(order model2.Order) error {
 		nodeValue := firstNode.GetValue()
 
 		if nodeValue.GetQuantity().GreaterThanOrEqual(order.Quantity) {
-			trade := model2.Trade{
+			trade := model.Trade{
 				Id:             GenerateTradeId(),
 				TradePair:      order.TradePair,
 				MakerId:        nodeValue.GetId(),
@@ -39,7 +39,7 @@ func (orderBook *OrderBook) handleAskLimit(order model2.Order) error {
 				orderBook.bid.Delete(firstNode.GetScore(), nodeValue.GetId())
 			}
 		} else {
-			trade := model2.Trade{
+			trade := model.Trade{
 				Id:             GenerateTradeId(),
 				TradePair:      order.TradePair,
 				MakerId:        nodeValue.GetId(),
@@ -69,14 +69,14 @@ func (orderBook *OrderBook) handleAskLimit(order model2.Order) error {
 	return nil
 }
 
-func (orderBook *OrderBook) handleAskMarket(order model2.Order) error {
-	trades := make([]model2.Trade, 0)
+func (orderBook *OrderBook) handleAskMarket(order model.Order) error {
+	trades := make([]model.Trade, 0)
 	for orderBook.bid.First() != nil && order.Quantity.GreaterThan(decimal.Zero) {
 		firstNode := orderBook.bid.First()
 		nodeValue := firstNode.GetValue()
 
 		if nodeValue.GetQuantity().GreaterThanOrEqual(order.Quantity) {
-			trade := model2.Trade{
+			trade := model.Trade{
 				Id:             GenerateTradeId(),
 				TradePair:      order.TradePair,
 				MakerId:        nodeValue.GetId(),
@@ -99,7 +99,7 @@ func (orderBook *OrderBook) handleAskMarket(order model2.Order) error {
 				orderBook.bid.Delete(firstNode.GetScore(), nodeValue.GetId())
 			}
 		} else {
-			trade := model2.Trade{
+			trade := model.Trade{
 				Id:             GenerateTradeId(),
 				TradePair:      order.TradePair,
 				MakerId:        nodeValue.GetId(),
@@ -122,7 +122,7 @@ func (orderBook *OrderBook) handleAskMarket(order model2.Order) error {
 	// 同bid market，具体看怎么处理
 	// 我觉得应该加到市价单队列，单独搞一个队列
 	if order.Quantity.GreaterThan(decimal.Zero) {
-		trade := model2.Trade{
+		trade := model.Trade{
 			Id:             GenerateTradeId(),
 			TradePair:      order.TradePair,
 			MakerId:        order.Id,
@@ -132,7 +132,7 @@ func (orderBook *OrderBook) handleAskMarket(order model2.Order) error {
 			Price:          order.Price.String(),
 			Quantity:       order.Quantity.String(),
 			TakerOrderSide: order.Side.String(),
-			TakerOrderType: model2.CancelOrderStr,
+			TakerOrderType: model.CancelOrderStr,
 			Timestamp:      time.Now().UnixMilli(),
 		}
 		trades = append(trades, trade)

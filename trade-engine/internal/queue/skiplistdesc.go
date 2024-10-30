@@ -2,7 +2,6 @@ package queue
 
 import "github.com/shopspring/decimal"
 
-// SkipListDesc 从大到小排序
 type SkipListDesc struct {
 	*SkipList
 }
@@ -27,7 +26,6 @@ func (list *SkipListDesc) Insert(score decimal.Decimal, value NodeValue) *SkipLi
 		} else {
 			rank[i] = rank[i+1]
 		}
-		// 下个节点存在，并且下个节点的score大于等于score时(score相同，按时间排序)
 		for p.Next(i) != nil && p.Next(i).score.GreaterThanOrEqual(score) {
 			rank[i] += p.level[i].span
 			p = p.Next(i)
@@ -55,17 +53,14 @@ func (list *SkipListDesc) Insert(score decimal.Decimal, value NodeValue) *SkipLi
 		update[i].SetSpan(i, rank[0]-rank[i]+1)
 	}
 
-	// 处理新增节点的span
 	for i := level; i < list.level; i++ {
 		update[i].level[i].span++
 	}
-	// 处理新增节点的后退指针
 	if update[0] == list.head {
 		newNode.backward = nil
 	} else {
 		newNode.backward = update[0]
 	}
-	// 判断新插入的节点是不是最后一个节点
 	if newNode.Next(0) != nil {
 		newNode.Next(0).backward = newNode
 	} else {
