@@ -1,0 +1,15 @@
+Name: trade-engine.rpc
+ListenOn: 0.0.0.0:9083
+Etcd:
+  Hosts:
+  - 127.0.0.1:2379
+  Key: trade-engine.rpc
+LogConfig:
+  ServiceName: trade-engine-rpc
+  Mode: console
+  Encoding: plain
+  Stat: false
+Kafka:
+  Addr: "192.168.0.101:9093"
+  WriteCap: 100
+  ReadCap: 100

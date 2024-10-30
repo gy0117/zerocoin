@@ -1,0 +1,154 @@
+package engine
+
+import (
+	"github.com/shopspring/decimal"
+	"time"
+	model2 "trade-engine/internal/model"
+)
+
+// 挂单 限价单
+func (orderBook *OrderBook) handleBidLimit(order model2.Order) error {
+	trades := make([]model2.Trade, 0)
+	for orderBook.ask.First() != nil &&
+		orderBook.ask.First().GetScore().LessThanOrEqual(order.Price) &&
+		order.Quantity.GreaterThan(decimal.Zero) {
+
+		firstNode := orderBook.ask.First()
+		nodeValue := firstNode.GetValue()
+
+		if nodeValue.GetQuantity().GreaterThanOrEqual(order.Quantity) {
+			// 全部吃掉order
+			trade := model2.Trade{
+				Id:             GenerateTradeId(),
+				TradePair:      order.TradePair,
+				MakerId:        nodeValue.GetId(),
+				TakerId:        order.Id,
+				MakerUser:      nodeValue.GetUid(),
+				TakerUser:      order.Uid,
+				Price:          firstNode.GetScore().String(),
+				Quantity:       order.Quantity.String(),
+				TakerOrderSide: order.Side.String(),
+				TakerOrderType: order.Type.String(),
+				Timestamp:      time.Now().UnixMilli(),
+			}
+			trades = append(trades, trade)
+
+			left := nodeValue.GetQuantity().Sub(order.Quantity)
+			order.Quantity = order.Quantity.Sub(order.Quantity)
+			if left.GreaterThan(decimal.Zero) {
+				nodeValue.SetQuantity(left)
+			} else {
+				orderBook.ask.Delete(firstNode.GetScore(), nodeValue.GetId())
+			}
+		} else {
+			// 吃掉firstNode，order还剩余
+			trade := model2.Trade{
+				Id:             GenerateTradeId(),
+				TradePair:      order.TradePair,
+				MakerId:        nodeValue.GetId(),
+				TakerId:        order.Id,
+				MakerUser:      nodeValue.GetUid(),
+				TakerUser:      order.Uid,
+				Price:          firstNode.GetScore().String(),
+				Quantity:       nodeValue.GetQuantity().String(),
+				TakerOrderSide: order.Side.String(),
+				TakerOrderType: order.Type.String(),
+				Timestamp:      time.Now().UnixMilli(),
+			}
+			trades = append(trades, trade)
+			order.Quantity = order.Quantity.Sub(nodeValue.GetQuantity())
+			orderBook.ask.Delete(firstNode.GetScore(), nodeValue.GetId())
+		}
+	}
+
+	if order.Quantity.GreaterThan(decimal.Zero) {
+		orderBook.bid.Insert(order.Price, &order)
+		orderBook.mBid[order.Id] = order.Price
+	}
+
+	if len(trades) > 0 {
+		orderBook.PushTradeTickets(trades...)
+	}
+	return nil
+}
+
+// 市价单
+func (orderBook *OrderBook) handleBidMarket(order model2.Order) error {
+	trades := make([]model2.Trade, 0)
+	// 市价单不看对方价格，就要立即成交
+	for orderBook.ask.First() != nil && order.Quantity.GreaterThan(decimal.Zero) {
+		firstNode := orderBook.ask.First()
+		nodeValue := firstNode.GetValue()
+
+		if nodeValue.GetQuantity().GreaterThanOrEqual(order.Quantity) {
+			// 吃掉order
+			trade := model2.Trade{
+				Id:             GenerateTradeId(),
+				TradePair:      order.TradePair,
+				MakerId:        nodeValue.GetId(), // 挂单id
+				TakerId:        order.Id,
+				MakerUser:      nodeValue.GetUid(),
+				TakerUser:      order.Uid,
+				Price:          firstNode.GetScore().String(),
+				Quantity:       order.Quantity.String(),
+				TakerOrderSide: order.Side.String(),
+				TakerOrderType: order.Type.String(),
+				Timestamp:      time.Now().UnixMilli(),
+			}
+			trades = append(trades, trade)
+
+			left := nodeValue.GetQuantity().Sub(order.Quantity)
+			order.Quantity = order.Quantity.Sub(order.Quantity)
+			if left.GreaterThan(decimal.Zero) {
+				nodeValue.SetQuantity(left)
+			} else {
+				orderBook.ask.Delete(firstNode.GetScore(), nodeValue.GetId())
+			}
+		} else {
+			// 吃掉firstNode
+			trade := model2.Trade{
+				Id:             GenerateTradeId(),
+				TradePair:      order.TradePair,
+				MakerId:        nodeValue.GetId(),
+				TakerId:        order.Id,
+				MakerUser:      nodeValue.GetUid(),
+				TakerUser:      order.Uid,
+				Price:          firstNode.GetScore().String(),
+				Quantity:       nodeValue.GetQuantity().String(),
+				TakerOrderSide: order.Side.String(),
+				TakerOrderType: order.Type.String(),
+				Timestamp:      time.Now().UnixMilli(),
+			}
+			trades = append(trades, trade)
+			order.Quantity = order.Quantity.Sub(nodeValue.GetQuantity())
+			orderBook.ask.Delete(firstNode.GetScore(), nodeValue.GetId())
+		}
+	}
+
+	// check order是否完成被吃掉
+	// TODO 具体看策略，应该加到市价单队列中 或者 推送出去
+	if order.Quantity.GreaterThan(decimal.Zero) {
+		trade := model2.Trade{
+			Id:             GenerateTradeId(),
+			TradePair:      order.TradePair,
+			MakerId:        order.Id,
+			TakerId:        order.Id,
+			MakerUser:      order.Uid,
+			TakerUser:      order.Uid,
+			Price:          order.Price.String(),
+			Quantity:       order.Quantity.String(),
+			TakerOrderSide: order.Side.String(),
+			TakerOrderType: model2.CancelOrderStr,
+			Timestamp:      time.Now().UnixMilli(),
+		}
+		trades = append(trades, trade)
+
+		// TODO 应该加到市价单队列中，后续优化
+		//orderBook.bid.Insert(order.Price, &order)
+		//orderBook.mBid[order.Id] = order.Price
+	}
+	if len(trades) > 0 {
+		orderBook.PushTradeTickets(trades...)
+	}
+	return nil
+}

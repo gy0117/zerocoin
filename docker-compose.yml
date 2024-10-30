@@ -4,6 +4,21 @@ networks:
     driver: ${NETWORKS_DRIVER}
 
 services:
+  Etcd:
+    container_name: etcd
+    image: bitnami/etcd:${ETCD_VERSION}
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+    privileged: true
+    volumes:
+      - ${ETCD_DIR}/data:/bitnami/etcd/data
+    ports:
+      - ${ETCD_PORT}:2379
+      - 2380:2380
   mysql:
     image: mysql:${MYSQL_VERSION}
     container_name: mysql
@@ -15,7 +30,9 @@ services:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}    # 设置 Mysql root 用户密码
     privileged: true
     volumes:
-      - ${DATA_PATH_HOST}/mysql:/var/lib/mysql        # 引用 .env 配置中 DATA_PATH_HOST 变量，将宿主机上存放 Mysql 数据的目录挂载到容器中 /var/lib/mysql 目录
+      - ${MYSQL_DIR}/data:/var/lib/mysql        # 引用 .env 配置中 MYSQL_DIR 变量，将宿主机上存放 Mysql 数据的目录挂载到容器中 /var/lib/mysql 目录
+      - ${MYSQL_DIR}/conf:/etc/mysql/conf.d/
+      - ${MYSQL_DIR}/logs:/logs
     ports:
       - "${MYSQL_PORT}:3306"                          # 设置容器3306端口映射指定宿主机端口
     networks:
@@ -28,7 +45,8 @@ services:
       - TZ=${TZ}
     privileged: true
     volumes:
-      - ${DATA_PATH_HOST}/redis:/data  # 将宿主机上存放redis数据的目录挂载到容器中
+      - ${REDIS_DIR}/data:/data  # 将宿主机上存放redis数据的目录挂载到容器中
+      - ${REDIS_DIR}/conf/redis.conf:/etc/redis/redis.conf
     ports:
       - "${REDIS_PORT}:6379"
     restart: always

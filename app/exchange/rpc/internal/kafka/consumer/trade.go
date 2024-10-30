@@ -83,6 +83,7 @@ func (kc *KafkaConsumer) readTradingOrder(client *kafka.KafkaClient) {
 			logx.Error(errors.New("there is no corresponding matching trading engine available"))
 			return
 		}
+		// 其实这也是异步的，因为是从kafka中读数据的，且开了goroutine
 		coinTrade.Trade(exchangeOrder)
 	}
 }

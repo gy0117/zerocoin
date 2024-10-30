@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package match;
+
+option go_package = "./match";
+
+message Order {
+  string id = 1;  // 订单id
+  int64 uid = 2;  // 用户id
+  string tradePair = 3;  // 交易对
+  string price = 4;  // 价格
+  string quantity = 5;   // 数量
+  int32 side = 6; // 订单方向
+  int32 type = 7;  // 订单类型
+}
+
+message AddOrderRequest {
+  Order order = 1;
+}
+
+message AddOrderResponse {
+  int32 code = 1;
+  string msg = 2;
+}
+
+message CancelOrderRequest {
+  string id = 1;
+  string tradePair = 2;
+}
+
+message CancelOrderResponse {
+  int32 code = 1;
+  string msg = 2;
+}
+
+service MatchService {
+  rpc AddOrder(AddOrderRequest) returns(AddOrderResponse);
+  rpc CancelOrder(CancelOrderRequest) returns(CancelOrderResponse);
+}

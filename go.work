@@ -1,14 +1,14 @@
-go 1.22
+go 1.22.6
 
 use (
-	./grpc-common
-	./zero-common
-	./app/ucenter/rpc
-	./app/ucenter/api
+	./app/exchange/api
+	./app/exchange/rpc
 	./app/job-center
 	./app/market/api
 	./app/market/rpc
-	./app/exchange/api
-	./app/exchange/rpc
+	./app/ucenter/api
+	./app/ucenter/rpc
+	./grpc-common
 	./trade-engine
+	./zero-common
 )
