@@ -3,7 +3,6 @@ package engine
 import (
 	"context"
 	"fmt"
-	"github.com/shopspring/decimal"
 	"log"
 	"trade-engine/internal/model"
 	"trade-engine/internal/queue"
@@ -17,31 +16,19 @@ const topicTradeCanceled = "trade_canceled"
 
 type OrderBook struct {
 	tradePair  string
-	bid        *queue.SkipListDesc        //  买入价，出价。即买家愿意出的价格。出价越高，越容易成交，因此从高到低排序
-	ask        *queue.SkipList            //  卖出价，卖家出的价格。按从低到高的顺序排列
-	mBid       map[string]decimal.Decimal // bid的订单id对应的score
-	mAsk       map[string]decimal.Decimal // ask的订单id对应的score
-	orderChan  chan *model.Order          // 异步处理挂单逻辑
-	cancelChan chan string                // 异步处理撤单逻辑
+	bidQueue   *queue.BidQueue
+	askQueue   *queue.AskQueue
+	orderChan  chan *model.Order // 异步处理挂单逻辑
+	cancelChan chan string       // 异步处理撤单逻辑
 
 	kCli *kafka.KafkaClient
 }
 
 func NewOrderBook(tradePair string, kCli *kafka.KafkaClient) (*OrderBook, error) {
-	bid, err := queue.NewSkipListDesc()
-	if err != nil {
-		return nil, err
-	}
-	ask, err := queue.NewSkipList()
-	if err != nil {
-		return nil, err
-	}
 	return &OrderBook{
 		tradePair:  tradePair,
-		bid:        bid,
-		ask:        ask,
-		mBid:       make(map[string]decimal.Decimal),
-		mAsk:       make(map[string]decimal.Decimal),
+		bidQueue:   queue.NewBidQueue(),
+		askQueue:   queue.NewAskQueue(),
 		orderChan:  make(chan *model.Order, maxOrderCap),
 		cancelChan: make(chan string, maxOrderCap),
 		kCli:       kCli,

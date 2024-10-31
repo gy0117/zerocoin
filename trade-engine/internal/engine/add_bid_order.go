@@ -9,11 +9,11 @@ import (
 // 挂单 限价单
 func (orderBook *OrderBook) handleBidLimit(order *model.Order) error {
 	trades := make([]model.Trade, 0)
-	for orderBook.ask.First() != nil &&
-		orderBook.ask.First().GetScore().LessThanOrEqual(order.Price) &&
+	for orderBook.askQueue.First() != nil &&
+		orderBook.askQueue.First().GetScore().LessThanOrEqual(order.Price) &&
 		order.Quantity.GreaterThan(decimal.Zero) {
 
-		firstNode := orderBook.ask.First()
+		firstNode := orderBook.askQueue.First()
 		nodeValue := firstNode.GetValue()
 
 		if nodeValue.GetQuantity().GreaterThanOrEqual(order.Quantity) {
@@ -38,7 +38,7 @@ func (orderBook *OrderBook) handleBidLimit(order *model.Order) error {
 			if left.GreaterThan(decimal.Zero) {
 				nodeValue.SetQuantity(left)
 			} else {
-				orderBook.ask.Delete(firstNode.GetScore(), nodeValue.GetId())
+				orderBook.askQueue.Delete(firstNode.GetScore(), nodeValue.GetId())
 			}
 		} else {
 			// 吃掉firstNode，order还剩余
@@ -57,13 +57,13 @@ func (orderBook *OrderBook) handleBidLimit(order *model.Order) error {
 			}
 			trades = append(trades, trade)
 			order.Quantity = order.Quantity.Sub(nodeValue.GetQuantity())
-			orderBook.ask.Delete(firstNode.GetScore(), nodeValue.GetId())
+			orderBook.askQueue.Delete(firstNode.GetScore(), nodeValue.GetId())
 		}
 	}
 
 	if order.Quantity.GreaterThan(decimal.Zero) {
-		orderBook.bid.Insert(order.Price, order)
-		orderBook.mBid[order.Id] = order.Price
+		orderBook.bidQueue.Insert(order.Price, order)
+		orderBook.bidQueue.AddToMap(order.Id, order.Price)
 	}
 
 	if len(trades) > 0 {
@@ -76,8 +76,8 @@ func (orderBook *OrderBook) handleBidLimit(order *model.Order) error {
 func (orderBook *OrderBook) handleBidMarket(order *model.Order) error {
 	trades := make([]model.Trade, 0)
 	// 市价单不看对方价格，就要立即成交
-	for orderBook.ask.First() != nil && order.Quantity.GreaterThan(decimal.Zero) {
-		firstNode := orderBook.ask.First()
+	for orderBook.askQueue.First() != nil && order.Quantity.GreaterThan(decimal.Zero) {
+		firstNode := orderBook.askQueue.First()
 		nodeValue := firstNode.GetValue()
 
 		if nodeValue.GetQuantity().GreaterThanOrEqual(order.Quantity) {
@@ -102,7 +102,7 @@ func (orderBook *OrderBook) handleBidMarket(order *model.Order) error {
 			if left.GreaterThan(decimal.Zero) {
 				nodeValue.SetQuantity(left)
 			} else {
-				orderBook.ask.Delete(firstNode.GetScore(), nodeValue.GetId())
+				orderBook.askQueue.Delete(firstNode.GetScore(), nodeValue.GetId())
 			}
 		} else {
 			// 吃掉firstNode
@@ -121,7 +121,7 @@ func (orderBook *OrderBook) handleBidMarket(order *model.Order) error {
 			}
 			trades = append(trades, trade)
 			order.Quantity = order.Quantity.Sub(nodeValue.GetQuantity())
-			orderBook.ask.Delete(firstNode.GetScore(), nodeValue.GetId())
+			orderBook.askQueue.Delete(firstNode.GetScore(), nodeValue.GetId())
 		}
 	}
 
