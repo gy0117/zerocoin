@@ -28,16 +28,16 @@ func NewTradeEngineServer(svcCtx *svc.ServiceContext) *TradeEngineServer {
 	return server
 }
 
-func (tes *TradeEngineServer) init() {
-	tradeEngine, err := engine.NewTradeEngine(defaultTradePairs, tes.svcCtx.KCli)
+func (server *TradeEngineServer) init() {
+	tradeEngine, err := engine.NewTradeEngine(defaultTradePairs, server.svcCtx.KCli)
 	if err != nil {
 		panic(err)
 		return
 	}
-	tes.tradeEngine = tradeEngine
+	server.tradeEngine = tradeEngine
 }
 
-func (tes *TradeEngineServer) AddOrder(ctx context.Context, in *match.AddOrderRequest) (*match.AddOrderResponse, error) {
+func (server *TradeEngineServer) AddOrder(ctx context.Context, in *match.AddOrderRequest) (*match.AddOrderResponse, error) {
 	price, err := decimal.NewFromString(in.Order.Price)
 	if err != nil {
 		return &match.AddOrderResponse{
@@ -62,7 +62,7 @@ func (tes *TradeEngineServer) AddOrder(ctx context.Context, in *match.AddOrderRe
 		Side:      model.Side(in.Order.Side),
 		Type:      model.Type(in.Order.Type),
 	}
-	err = tes.tradeEngine.AddOrder(order)
+	err = server.tradeEngine.AddOrder(order)
 	if err != nil {
 		return &match.AddOrderResponse{
 			Code: -1,
@@ -75,6 +75,16 @@ func (tes *TradeEngineServer) AddOrder(ctx context.Context, in *match.AddOrderRe
 	}, nil
 }
 
-func (tes *TradeEngineServer) CancelOrder(ctx context.Context, cancelOrderRequest *match.CancelOrderRequest) (*match.CancelOrderResponse, error) {
-	return nil, nil
+func (server *TradeEngineServer) CancelOrder(ctx context.Context, cancelOrderRequest *match.CancelOrderRequest) (*match.CancelOrderResponse, error) {
+	err := server.tradeEngine.CancelOrder(cancelOrderRequest.TradePair, cancelOrderRequest.Id)
+	if err != nil {
+		return &match.CancelOrderResponse{
+			Code: -1,
+			Msg: err.Error(),
+		}, err
+	}
+	return &match.CancelOrderResponse{
+		Code: 0,
+		Msg: "success",
+	}, nil
 }
