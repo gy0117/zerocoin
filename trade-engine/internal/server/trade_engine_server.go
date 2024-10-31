@@ -62,7 +62,7 @@ func (server *TradeEngineServer) AddOrder(ctx context.Context, in *match.AddOrde
 		Side:      model.Side(in.Order.Side),
 		Type:      model.Type(in.Order.Type),
 	}
-	err = server.tradeEngine.AddOrder(order)
+	err = server.tradeEngine.AddOrder(ctx, order)
 	if err != nil {
 		return &match.AddOrderResponse{
 			Code: -1,
@@ -76,7 +76,7 @@ func (server *TradeEngineServer) AddOrder(ctx context.Context, in *match.AddOrde
 }
 
 func (server *TradeEngineServer) CancelOrder(ctx context.Context, cancelOrderRequest *match.CancelOrderRequest) (*match.CancelOrderResponse, error) {
-	err := server.tradeEngine.CancelOrder(cancelOrderRequest.TradePair, cancelOrderRequest.Id)
+	err := server.tradeEngine.CancelOrder(ctx, cancelOrderRequest.TradePair, cancelOrderRequest.Id)
 	if err != nil {
 		return &match.CancelOrderResponse{
 			Code: -1,

@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"context"
 	"sync"
 	"trade-engine/internal/model"
 	"zero-common/kafka"
@@ -25,14 +26,14 @@ func (engine *TradeEngine) load(pair string) *OrderBook {
 	return orderBook
 }
 
-func (engine *TradeEngine) AddOrder(order *model.Order) error {
+func (engine *TradeEngine) AddOrder(ctx context.Context, order *model.Order) error {
 	orderBook := engine.load(order.TradePair)
-	return orderBook.Add(order)
+	return orderBook.Add(ctx, order)
 }
 
-func (engine *TradeEngine) CancelOrder(tradePair string, id string) error {
+func (engine *TradeEngine) CancelOrder(ctx context.Context, tradePair string, id string) error {
 	orderBook := engine.load(tradePair)
-	return orderBook.Cancel(id)
+	return orderBook.Cancel(ctx, id)
 }
 
 func NewTradeEngine(tradePairs []string, kCli *kafka.KafkaClient) (*TradeEngine, error) {

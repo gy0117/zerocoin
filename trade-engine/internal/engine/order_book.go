@@ -1,10 +1,10 @@
 package engine
 
 import (
+	"context"
 	"fmt"
 	"github.com/shopspring/decimal"
 	"log"
-	"time"
 	"trade-engine/internal/model"
 	"trade-engine/internal/queue"
 	"zero-common/kafka"
@@ -64,23 +64,21 @@ func (orderBook *OrderBook) Start() {
 }
 
 // Add 挂单 异步
-func (orderBook *OrderBook) Add(order *model.Order) error {
-	fmt.Println("orderBook Add")
+func (orderBook *OrderBook) Add(ctx context.Context, order *model.Order) error {
 	select {
 	case orderBook.orderChan <- order:
 		return nil
-	case <-time.After(time.Second):
+	case <-ctx.Done():
 		return TimeoutError
 	}
 }
 
 // Cancel 撤单 异步
-func (orderBook *OrderBook) Cancel(id string) error {
-	fmt.Println("orderBook Cancel")
+func (orderBook *OrderBook) Cancel(ctx context.Context, id string) error {
 	select {
 	case orderBook.cancelChan <- id:
 		return nil
-	case <-time.After(time.Second):
+	case <-ctx.Done():
 		return TimeoutError
 	}
 }
