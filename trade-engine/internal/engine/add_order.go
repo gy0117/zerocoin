@@ -6,7 +6,7 @@ import (
 	"trade-engine/internal/model"
 )
 
-func (orderBook *OrderBook) add(order model.Order) error {
+func (orderBook *OrderBook) add(order *model.Order) error {
 	// 买入单
 	if order.Side == model.Buy {
 		return orderBook.handleBid(order)
@@ -16,7 +16,7 @@ func (orderBook *OrderBook) add(order model.Order) error {
 	return OrderSideError
 }
 
-func (orderBook *OrderBook) handleBid(order model.Order) error {
+func (orderBook *OrderBook) handleBid(order *model.Order) error {
 	if order.Type == model.LimitOrder {
 		return orderBook.handleBidLimit(order)
 	} else if order.Type == model.MarketOrder {
@@ -25,7 +25,7 @@ func (orderBook *OrderBook) handleBid(order model.Order) error {
 	return OrderTypeError
 }
 
-func (orderBook *OrderBook) handleAsk(order model.Order) error {
+func (orderBook *OrderBook) handleAsk(order *model.Order) error {
 	if order.Type == model.LimitOrder {
 		return orderBook.handleAskLimit(order)
 	} else if order.Type == model.MarketOrder {

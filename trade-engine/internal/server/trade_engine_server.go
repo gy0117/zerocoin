@@ -12,9 +12,11 @@ import (
 	"trade-engine/internal/svc"
 )
 
+var defaultTradePairs = []string{"BTC/USDT", "ETH/USDT"}
+
 type TradeEngineServer struct {
 	svcCtx     *svc.ServiceContext
-	tradePools *engine.TradePools
+	tradeEngine *engine.TradeEngine
 	match.UnimplementedMatchServiceServer
 }
 
@@ -27,14 +29,12 @@ func NewTradeEngineServer(svcCtx *svc.ServiceContext) *TradeEngineServer {
 }
 
 func (tes *TradeEngineServer) init() {
-	// TODO 查有几个交易对
-	tradePairs := []string{"BTC/USDT", "ETH/USDT"}
-	tradePools, err := engine.NewTradePools(tradePairs, tes.svcCtx.KCli)
+	tradeEngine, err := engine.NewTradeEngine(defaultTradePairs, tes.svcCtx.KCli)
 	if err != nil {
 		panic(err)
 		return
 	}
-	tes.tradePools = tradePools
+	tes.tradeEngine = tradeEngine
 }
 
 func (tes *TradeEngineServer) AddOrder(ctx context.Context, in *match.AddOrderRequest) (*match.AddOrderResponse, error) {
@@ -62,7 +62,7 @@ func (tes *TradeEngineServer) AddOrder(ctx context.Context, in *match.AddOrderRe
 		Side:      model.Side(in.Order.Side),
 		Type:      model.Type(in.Order.Type),
 	}
-	err = tes.tradePools.AddOrder(order)
+	err = tes.tradeEngine.AddOrder(order)
 	if err != nil {
 		return &match.AddOrderResponse{
 			Code: -1,

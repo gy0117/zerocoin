@@ -6,7 +6,7 @@ import (
 	"trade-engine/internal/model"
 )
 
-func (orderBook *OrderBook) handleAskLimit(order model.Order) error {
+func (orderBook *OrderBook) handleAskLimit(order *model.Order) error {
 	trades := make([]model.Trade, 0)
 	for orderBook.bid.First() != nil &&
 		orderBook.bid.First().GetScore().GreaterThanOrEqual(order.Price) &&
@@ -60,7 +60,7 @@ func (orderBook *OrderBook) handleAskLimit(order model.Order) error {
 	}
 
 	if order.Quantity.GreaterThan(decimal.Zero) {
-		orderBook.ask.Insert(order.Price, &order)
+		orderBook.ask.Insert(order.Price, order)
 		orderBook.mAsk[order.Id] = order.Price
 	}
 	if len(trades) > 0 {
@@ -69,7 +69,7 @@ func (orderBook *OrderBook) handleAskLimit(order model.Order) error {
 	return nil
 }
 
-func (orderBook *OrderBook) handleAskMarket(order model.Order) error {
+func (orderBook *OrderBook) handleAskMarket(order *model.Order) error {
 	trades := make([]model.Trade, 0)
 	for orderBook.bid.First() != nil && order.Quantity.GreaterThan(decimal.Zero) {
 		firstNode := orderBook.bid.First()
@@ -135,7 +135,7 @@ func (orderBook *OrderBook) handleAskMarket(order model.Order) error {
 			TakerOrderType: model.CancelOrderStr,
 			Timestamp:      time.Now().UnixMilli(),
 		}
-		trades = append(trades, trade)
+		go orderBook.PushTradeCanceled(trade)
 	}
 
 	if len(trades) > 0 {

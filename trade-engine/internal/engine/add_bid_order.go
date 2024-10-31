@@ -7,7 +7,7 @@ import (
 )
 
 // 挂单 限价单
-func (orderBook *OrderBook) handleBidLimit(order model.Order) error {
+func (orderBook *OrderBook) handleBidLimit(order *model.Order) error {
 	trades := make([]model.Trade, 0)
 	for orderBook.ask.First() != nil &&
 		orderBook.ask.First().GetScore().LessThanOrEqual(order.Price) &&
@@ -62,7 +62,7 @@ func (orderBook *OrderBook) handleBidLimit(order model.Order) error {
 	}
 
 	if order.Quantity.GreaterThan(decimal.Zero) {
-		orderBook.bid.Insert(order.Price, &order)
+		orderBook.bid.Insert(order.Price, order)
 		orderBook.mBid[order.Id] = order.Price
 	}
 
@@ -73,7 +73,7 @@ func (orderBook *OrderBook) handleBidLimit(order model.Order) error {
 }
 
 // 市价单
-func (orderBook *OrderBook) handleBidMarket(order model.Order) error {
+func (orderBook *OrderBook) handleBidMarket(order *model.Order) error {
 	trades := make([]model.Trade, 0)
 	// 市价单不看对方价格，就要立即成交
 	for orderBook.ask.First() != nil && order.Quantity.GreaterThan(decimal.Zero) {
@@ -141,11 +141,11 @@ func (orderBook *OrderBook) handleBidMarket(order model.Order) error {
 			TakerOrderType: model.CancelOrderStr,
 			Timestamp:      time.Now().UnixMilli(),
 		}
-		trades = append(trades, trade)
 
-		// TODO 应该加到市价单队列中，后续优化
 		//orderBook.bid.Insert(order.Price, &order)
 		//orderBook.mBid[order.Id] = order.Price
+
+		go orderBook.PushTradeCanceled(trade)
 	}
 	if len(trades) > 0 {
 		orderBook.PushTradeTickets(trades...)

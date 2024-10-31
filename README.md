@@ -13,6 +13,6 @@ Feature:
 - Use a skip list to implement bid and ask queues
 
 Improvements that can be added: 
-- [ ] Ability to cancel an order
+- [x] Ability to cancel an order
 - [ ] Monitoring
 - [ ] Back up the order book in persistent storage
