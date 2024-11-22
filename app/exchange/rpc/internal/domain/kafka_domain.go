@@ -145,7 +145,7 @@ func (kd *KafkaDomain) Send2Plate(orderId string) error {
 		// 需要发送消息到kafka，订单需要加入到撮合交易当中
 		// 如果没有撮合交易成功，加入到撮合交易等待队列，继续等待完成撮合
 		marshal, _ := json.Marshal(exchangeOrder)
-		logx.Info("exchange-rpc.Send2Plate | 发送到kafka：", string(marshal))
+		logx.Info("exchange-rpc.Send2Plate | send to kafka：", string(marshal))
 
 		orderData := kafka.KafkaData{
 			Topic: topicExchangeOrderTrading,

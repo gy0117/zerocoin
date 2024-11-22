@@ -19,8 +19,6 @@ type Rate struct {
 }
 
 func (r *Rate) Do() {
-	logx.Info("获取法币汇率")
-
 	go r.getCny2Usd()
 }
 

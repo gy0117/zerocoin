@@ -121,7 +121,7 @@ func (kc *KafkaConsumer) readCompleteOrder(client *kafka.KafkaClient, orderDomai
 				time.Sleep(time.Millisecond * 250)
 				continue
 			}
-			logx.Info("[exchange-rpc] | KafkaConsumer ｜ 发送 update_wallet_after_order_complete 消息, orderId: " + exchangeOrder.OrderId)
+			logx.Info("[exchange-rpc] | KafkaConsumer ｜ send [update_wallet_after_order_complete] message, orderId: " + exchangeOrder.OrderId)
 			break
 		}
 	}

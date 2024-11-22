@@ -54,7 +54,7 @@ func UpdateWalletAfterOrderComplete(kCli *kafka.KafkaClient, redisCli *redis.Red
 		if exchangeOrder == nil || exchangeOrder.Status != model.StatusCompleted {
 			continue
 		}
-		logx.Info("[ucenter-rpc] | 收到 update_wallet_after_order_complete 消息 | orderId: " + exchangeOrder.OrderId)
+		logx.Info("[ucenter-rpc] | receive [update_wallet_after_order_complete] message | orderId: " + exchangeOrder.OrderId)
 
 		// @gy 重点
 		// user_id的row 只能同时由一个人操作，使用gozero自带的锁
@@ -124,7 +124,7 @@ func updateWalletAfterOrderCompleteInner(exchangeOrder *model.ExchangeOrder, wal
 		logx.Error("[ucenter-rpc] | updateMemberWalletAfterOrderComplete | buy | UpdateWalletCoinAndBase, err: ", err)
 		return err
 	}
-	logx.Info("[ucenter-rpc] | 更新钱包成功 | orderId: " + exchangeOrder.OrderId)
+	logx.Info("[ucenter-rpc] | update wallet successfully | orderId: " + exchangeOrder.OrderId)
 	return nil
 }
 

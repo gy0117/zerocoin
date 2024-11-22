@@ -1,4 +1,12 @@
-# zerocoin
+# zerocoin      
+
+### latest-update  
+1. Using distributed transaction to processing match-orders
+2. Optimize order queues using skip lists
+3. Support token revocation
+
+
+
 
 
 ### trade-engine

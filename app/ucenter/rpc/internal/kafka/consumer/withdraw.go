@@ -24,7 +24,7 @@ func ConsumeBtcWithdraw(kCli *kafka.KafkaClient, db *zerodb.ZeroDB) {
 		if err != nil {
 			logx.Error(err)
 		} else {
-			logx.Info("提现成功")
+			logx.Info("withdraw successfully")
 		}
 	}
 }

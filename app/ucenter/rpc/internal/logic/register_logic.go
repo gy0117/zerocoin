@@ -107,7 +107,7 @@ func (l *RegisterLogic) SendCode(in *register.CodeReq) (*register.CodeResp, erro
 
 	go func() {
 		// 2. 发送验证码
-		logx.Info("RPC-REGISTER | rpc sendCode 发送验证码")
+		logx.Info("RPC-REGISTER | rpc sendCode")
 	}()
 
 	// 3. 将验证码存入redis，过期时间10分钟

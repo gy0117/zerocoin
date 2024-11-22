@@ -216,7 +216,7 @@ func dbGet(c config.Config) *dtmutil.DB {
 }
 
 func (l *WalletLogic) FreezeUserAsset(in *wallet.FreezeUserAssetReq) (*wallet.Empty, error) {
-	logx.Info("saga -> 冻结资产")
+	logx.Info("saga -> freeze assets")
 	// TODO 需要吗？1. 根据orderId，查询订单状态，如果订单交易中，说明已经被处理了  感觉是不需要了
 
 	// 冻结
@@ -245,7 +245,7 @@ func (l *WalletLogic) FreezeUserAsset(in *wallet.FreezeUserAssetReq) (*wallet.Em
 
 // 将冻结的钱还原回去
 func (l *WalletLogic) UnFreezeUserAsset(in *wallet.FreezeUserAssetReq) (*wallet.Empty, error) {
-	logx.Info("saga -> 解冻资产")
+	logx.Info("saga -> unfreeze assets")
 	barrier, err := dtmgrpc.BarrierFromGrpc(l.ctx)
 	if err != nil {
 		return nil, errors.Wrap(status.Error(codes.Aborted, err.Error()), "unfreeze asset create barrier failed")
@@ -268,12 +268,12 @@ func (l *WalletLogic) UnFreezeUserAsset(in *wallet.FreezeUserAssetReq) (*wallet.
 
 // TODO
 func (l *WalletLogic) DeductUserAsset(in *wallet.DeductUserAssetReq) (*wallet.Empty, error) {
-	logx.Info("saga -> 扣减资产")
+	logx.Info("saga -> deduct assets")
 	return &wallet.Empty{}, nil
 }
 
 // TODO
 func (l *WalletLogic) AddUserAsset(in *wallet.AddUserAssetReq) (*wallet.Empty, error) {
-	logx.Info("saga -> 增加资产")
+	logx.Info("saga -> increase assets")
 	return &wallet.Empty{}, nil
 }
