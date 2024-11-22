@@ -30,6 +30,7 @@ func addOrderRouters(server *rest.Server, serverCtx *svc.ServiceContext) {
 			Handler: AddOrder(serverCtx),
 		},
 	}
-	server.AddRoutes(rest.WithMiddleware(middleware.Auth(serverCtx.Config.Jwt.AccessSecret), rs...))
+	server.AddRoutes(rest.WithMiddleware(middleware.Auth(serverCtx.Config.Jwt.AccessSecret, func(token string) bool {
+		return serverCtx.IsTokenInBlackList(token)
+	}), rs...))
 }
-

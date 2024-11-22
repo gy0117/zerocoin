@@ -11,7 +11,9 @@ func CheckLoginHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get("X-Auth-Token")
 		l := logic.NewLoginLogic(r.Context(), svcCtx)
-		isOk, err := l.CheckLogin(token)
+		isOk, err := l.CheckLogin(token, func() bool {
+			return svcCtx.IsTokenInBlackList(token)
+		})
 		result.HttpResult2(w, r, isOk, err)
 	}
 }

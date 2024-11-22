@@ -30,9 +30,6 @@ func (l LoginLogic) Login(req *types.LoginReq) (*types.LoginResp, error) {
 	ctx, cancel := context.WithTimeout(l.ctx, time.Second*30)
 	defer cancel()
 
-	//logx.Error("测试的日志, login-api")
-	//logx.Info("测试的日志-info, login-api")
-
 	// 这里的参数需要转换，api层和rpc层的对象不要用同一个
 	loginReq := &login.LoginReq{}
 	_ = copier.Copy(loginReq, req)
@@ -46,12 +43,16 @@ func (l LoginLogic) Login(req *types.LoginReq) (*types.LoginResp, error) {
 	return result, nil
 }
 
-func (l LoginLogic) CheckLogin(token string) (bool, error) {
+func (l LoginLogic) CheckLogin(token string, f func() bool) (bool, error) {
 	// jwt 解析token
 	_, err := tools.ParseToken(token, l.svcCtx.Config.Jwt.AccessSecret)
 
 	if err != nil {
 		return false, errors.Wrapf(err, "token: %s", token)
+	}
+
+	if f() {
+		return false, nil
 	}
 	return true, nil
 }

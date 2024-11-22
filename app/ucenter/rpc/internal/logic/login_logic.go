@@ -47,47 +47,40 @@ func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic 
 // 匹配成功，使用jwt生成token
 // 返回登录所用信息
 func (l *LoginLogic) Login(in *login.LoginReq) (*login.LoginResp, error) {
-	// 如果使用postman的话，就不走人机验证
-	logx.Info("in.Env = " + in.Env)
 
-	//logx.Error("测试的日志, login-rpc")
-	//logx.Info("测试的日志-info, login-rpc")
+	if in.Env != "dev_postman" {
+		// 1. 人机验证
+		isVerify := l.captchaVerify.Verify(
+			l.svcCtx.Config.CaptchaVerify.Vid,
+			l.svcCtx.Config.CaptchaVerify.SecretKey,
+			in.Captcha.Server,
+			in.Captcha.Token,
+			in.Ip,
+			verify.RegisterScene,
+		)
 
-	// TODO 暂时不走人机验证
-	//if in.Env != "dev_postman" {
-	//	// 1. 人机验证
-	//	isVerify := l.captchaVerify.Verify(
-	//		l.svcCtx.Config.CaptchaVerify.Vid,
-	//		l.svcCtx.Config.CaptchaVerify.SecretKey,
-	//		in.Captcha.Server,
-	//		in.Captcha.Token,
-	//		in.Ip,
-	//		verify.RegisterScene,
-	//	)
-	//
-	//	if !isVerify {
-	//		return nil, errors.New("人机验证不通过")
-	//	}
-	//}
+		if !isVerify {
+			return nil, errors.New("human-machine verification failed")
+		}
+	}
 
 	// 2. 密码验证
 	// in.Username是手机号
 	user, err := l.userDomain.FindByPhone(l.ctx, in.Username)
 	if err != nil {
-		return nil, errors.Wrapf(ErrUserLogin, "查询手机号失败 phone: %s, err: %v", in.Username, err)
+		return nil, errors.Wrapf(ErrUserLogin, "failed to search phone number, and phone: %s, err: %v", in.Username, err)
 	}
 	if user == nil {
-		return nil, errors.Wrapf(ErrPhoneNotExist, "手机号不存在 phone: %s", in.Username)
+		return nil, errors.Wrapf(ErrPhoneNotExist, "phone number not exist, and phone: %s", in.Username)
 	}
 	if ok := tools.Verify(in.Password, user.Salt, user.Password, nil); !ok {
-		return nil, errors.Wrapf(ErrPassword, "密码错误 phone: %s", in.Username)
+		return nil, errors.Wrapf(ErrPassword, "password not corrent, and phone: %s", in.Username)
 	}
 
 	// 3. 登录成功，将jwt token返回给前端
-	//token, err := l.generateToken(user.Id, user.Username)
 	token, err := l.getJwtToken(l.svcCtx.Config.Jwt.AccessSecret, time.Now().Unix(), l.svcCtx.Config.Jwt.AccessExpire, user.Id)
 	if err != nil {
-		return nil, errors.Wrapf(ErrGenerateToken, "token生成失败 phone: %s, err: %v", in.Username, err)
+		return nil, errors.Wrapf(ErrGenerateToken, "failed to generate token, and phone: %s, err: %v", in.Username, err)
 	}
 
 	return &login.LoginResp{

@@ -79,7 +79,9 @@ func addWalletRouters(server *rest.Server, serverCtx *svc.ServiceContext) {
 		},
 	}
 	server.AddRoutes(
-		rest.WithMiddleware(middleware.Auth(serverCtx.Config.Jwt.AccessSecret), routers...),
+		rest.WithMiddleware(middleware.Auth(serverCtx.Config.Jwt.AccessSecret, func(token string) bool {
+			return serverCtx.IsTokenInBlackList(token)
+		}), routers...),
 	)
 }
 
@@ -108,7 +110,9 @@ func addWithdrawRouters(server *rest.Server, serverCtx *svc.ServiceContext) {
 		},
 	}
 	server.AddRoutes(
-		rest.WithMiddleware(middleware.Auth(serverCtx.Config.Jwt.AccessSecret), routers...),
+		rest.WithMiddleware(middleware.Auth(serverCtx.Config.Jwt.AccessSecret, func(token string) bool {
+			return serverCtx.IsTokenInBlackList(token)
+		}), routers...),
 	)
 }
 
@@ -122,6 +126,8 @@ func addSecurityRouters(server *rest.Server, serverCtx *svc.ServiceContext) {
 		},
 	}
 	server.AddRoutes(
-		rest.WithMiddleware(middleware.Auth(serverCtx.Config.Jwt.AccessSecret), routers...),
+		rest.WithMiddleware(middleware.Auth(serverCtx.Config.Jwt.AccessSecret, func(token string) bool {
+			return serverCtx.IsTokenInBlackList(token)
+		}), routers...),
 	)
 }

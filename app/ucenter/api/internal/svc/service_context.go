@@ -1,6 +1,8 @@
 package svc
 
 import (
+	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/zrpc"
 	"grpc-common/market/mclient"
 	"grpc-common/ucenter/uclient"
@@ -9,6 +11,7 @@ import (
 
 type ServiceContext struct {
 	Config        config.Config
+	redis         *redis.Redis
 	UCRegisterRpc uclient.Register
 	UCLoginRpc    uclient.Login
 	UCWalletRpc   uclient.Wallet
@@ -20,6 +23,7 @@ type ServiceContext struct {
 func NewServiceContext(c config.Config) *ServiceContext {
 	return &ServiceContext{
 		Config:        c,
+		redis:         redis.MustNewRedis(c.CacheRedis[0].RedisConf),
 		UCRegisterRpc: uclient.NewRegister(zrpc.MustNewClient(c.UCenterRpc)),
 		UCLoginRpc:    uclient.NewLogin(zrpc.MustNewClient(c.UCenterRpc)),
 		UCWalletRpc:   uclient.NewWallet(zrpc.MustNewClient(c.UCenterRpc)),
@@ -27,4 +31,14 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		MarketRpc:     mclient.NewMarket(zrpc.MustNewClient(c.MarketRpc)),
 		UCWithdrawRpc: uclient.NewWithdraw(zrpc.MustNewClient(c.UCenterRpc)),
 	}
+}
+
+// IsTokenInBlackList check token if in black list
+func (serviceCtx *ServiceContext) IsTokenInBlackList(token string) bool {
+	exists, err := serviceCtx.redis.Exists(token)
+	if err != nil {
+		logx.Error(err)
+		return false
+	}
+	return exists
 }
