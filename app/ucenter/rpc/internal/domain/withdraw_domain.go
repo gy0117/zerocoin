@@ -1,15 +1,15 @@
 package domain
 
 import (
+	"common/btc"
+	"common/operate"
+	"common/zerodb"
 	"context"
 	"errors"
 	"github.com/zeromicro/go-zero/core/logx"
 	"ucenter-rpc/internal/dao"
 	"ucenter-rpc/internal/model"
 	"ucenter-rpc/internal/repo"
-	"zero-common/btc"
-	"zero-common/operate"
-	"zero-common/zerodb"
 )
 
 type WithdrawDomain struct {

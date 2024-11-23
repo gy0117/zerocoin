@@ -1,12 +1,12 @@
 package handler
 
 import (
+	"common/result"
 	"github.com/zeromicro/go-zero/rest/httpx"
 	"net/http"
 	"ucenter-api/internal/logic"
 	"ucenter-api/internal/svc"
 	"ucenter-api/internal/types"
-	"zero-common/result"
 )
 
 func SendCodeHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {

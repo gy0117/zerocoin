@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"common/zerodb/tran"
 	"context"
 	"exchange-rpc/internal/domain"
 	"exchange-rpc/internal/model"
@@ -9,7 +10,6 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"grpc-common/exchange/types/order"
 	"time"
-	"zero-common/zerodb/tran"
 )
 
 type GetOrdersLogic struct {

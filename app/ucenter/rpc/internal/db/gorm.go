@@ -1,10 +1,10 @@
 package db
 
 import (
+	"common/zerodb"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"zero-common/zerodb"
 )
 
 const (

@@ -1,9 +1,9 @@
 package repo
 
 import (
+	"common/zerodb"
 	"context"
 	"exchange-rpc/internal/model"
-	"zero-common/zerodb"
 )
 
 type OrderRepo interface {

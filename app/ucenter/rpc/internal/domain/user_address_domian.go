@@ -1,12 +1,12 @@
 package domain
 
 import (
+	"common/zerodb"
 	"context"
 	"errors"
 	"ucenter-rpc/internal/dao"
 	"ucenter-rpc/internal/model"
 	"ucenter-rpc/internal/repo"
-	"zero-common/zerodb"
 )
 
 type UserAddressDomain struct {

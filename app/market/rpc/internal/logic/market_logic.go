@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"common/zerr"
 	"context"
 	"github.com/jinzhu/copier"
 	"github.com/pkg/errors"
@@ -9,7 +10,6 @@ import (
 	"market-rpc/internal/domain"
 	"market-rpc/internal/svc"
 	"time"
-	"zero-common/zerr"
 )
 
 var ErrMarketFindSymbol = zerr.NewCodeErr(zerr.MARKET_FIND_SYMBOL_ERROR)

@@ -1,12 +1,12 @@
 package dao
 
 import (
+	"common/zerodb"
+	"common/zerodb/gorms"
 	"context"
 	"gorm.io/gorm"
 	"ucenter-rpc/internal/model"
 	"ucenter-rpc/internal/repo"
-	"zero-common/zerodb"
-	"zero-common/zerodb/gorms"
 )
 
 var _ repo.UserRepo = (*UserDao)(nil)

@@ -1,12 +1,12 @@
 package dao
 
 import (
+	"common/zerodb"
+	"common/zerodb/gorms"
 	"context"
 	"gorm.io/gorm"
 	"market-rpc/internal/model"
 	"market-rpc/internal/repo"
-	"zero-common/zerodb"
-	"zero-common/zerodb/gorms"
 )
 
 var _ repo.ExchangeCoinRepo = (*ExchangeCoinDao)(nil)

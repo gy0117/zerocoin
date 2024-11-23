@@ -1,13 +1,13 @@
 package dao
 
 import (
+	"common/zerodb"
+	"common/zerodb/gorms"
 	"context"
 	"errors"
 	"gorm.io/gorm"
 	"ucenter-rpc/internal/model"
 	"ucenter-rpc/internal/repo"
-	"zero-common/zerodb"
-	"zero-common/zerodb/gorms"
 )
 
 var _ repo.WalletRepo = (*WalletDao)(nil)

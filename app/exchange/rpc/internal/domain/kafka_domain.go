@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"common/kafka"
 	"context"
 	"encoding/json"
 	"errors"
@@ -9,7 +10,6 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"grpc-common/exchange/types/order"
 	"time"
-	"zero-common/kafka"
 )
 
 const (

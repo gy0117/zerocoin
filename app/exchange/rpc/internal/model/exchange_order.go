@@ -1,8 +1,8 @@
 package model
 
 import (
+	"common/enum"
 	"grpc-common/exchange/types/order"
-	"zero-common/enum"
 )
 
 const (

@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"common/zerr"
 	"context"
 	"github.com/jinzhu/copier"
 	"github.com/pkg/errors"
@@ -9,7 +10,6 @@ import (
 	"ucenter-rpc/internal/domain"
 	"ucenter-rpc/internal/svc"
 	"ucenter-rpc/internal/verify"
-	"zero-common/zerr"
 )
 
 var ErrFindUser = zerr.NewCodeErr(zerr.FIND_USER_ERROR)

@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"common/tools"
 	"context"
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -8,7 +9,6 @@ import (
 	"time"
 	"ucenter-api/internal/svc"
 	"ucenter-api/internal/types"
-	"zero-common/tools"
 )
 
 type ApproveLogic struct {

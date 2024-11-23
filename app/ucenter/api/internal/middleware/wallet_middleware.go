@@ -1,13 +1,13 @@
 package middleware
 
 import (
+	common "common/result"
+	"common/tools"
 	"context"
 	"fmt"
 	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/rest/httpx"
 	"net/http"
-	common "zero-common/result"
-	"zero-common/tools"
 )
 
 func Auth(secret string, f func(string) bool) rest.Middleware {

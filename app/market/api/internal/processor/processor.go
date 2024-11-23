@@ -1,13 +1,13 @@
 package processor
 
 import (
+	"common/kafka"
 	"context"
 	"encoding/json"
 	"github.com/zeromicro/go-zero/core/logx"
 	"grpc-common/market/mclient"
 	"grpc-common/market/types/market"
 	"market-api/internal/model"
-	"zero-common/kafka"
 )
 
 const KLINE_1M = "kline_1m"

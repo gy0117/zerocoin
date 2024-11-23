@@ -1,8 +1,8 @@
 package model
 
 import (
+	"common/operate"
 	"grpc-common/market/types/market"
-	"zero-common/operate"
 )
 
 type Kline struct {

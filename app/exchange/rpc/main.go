@@ -1,6 +1,7 @@
 package main
 
 import (
+	"common/interceptor/rpcserver"
 	"exchange-rpc/internal/config"
 	"exchange-rpc/internal/server"
 	"exchange-rpc/internal/svc"
@@ -12,7 +13,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"grpc-common/exchange/types/order"
-	"zero-common/interceptor/rpcserver"
 )
 
 var configFile = flag.String("f", "etc/conf.yaml", "the config file")

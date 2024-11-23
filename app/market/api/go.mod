@@ -5,6 +5,7 @@ go 1.22
 require (
 	github.com/googollee/go-socket.io v1.7.0
 	github.com/jinzhu/copier v0.4.0
+	github.com/pkg/errors v0.9.1
 	github.com/zeromicro/go-zero v1.6.3
 )
 

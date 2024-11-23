@@ -1,9 +1,9 @@
 package repo
 
 import (
+	"common/zerodb"
 	"context"
 	"ucenter-rpc/internal/model"
-	"zero-common/zerodb"
 )
 
 type WithdrawRepo interface {

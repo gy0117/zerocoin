@@ -1,13 +1,13 @@
 package handler
 
 import (
+	"common/result"
+	"common/tools"
 	"github.com/zeromicro/go-zero/rest/httpx"
 	"market-api/internal/logic"
 	"market-api/internal/svc"
 	"market-api/internal/types"
 	"net/http"
-	"zero-common/result"
-	"zero-common/tools"
 )
 
 // SymbolThumbTrendHandler 获取币种行情

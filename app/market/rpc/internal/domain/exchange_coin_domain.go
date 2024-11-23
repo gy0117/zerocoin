@@ -1,12 +1,12 @@
 package domain
 
 import (
+	"common/zerodb"
 	"context"
 	"errors"
 	"market-rpc/internal/dao"
 	"market-rpc/internal/model"
 	"market-rpc/internal/repo"
-	"zero-common/zerodb"
 )
 
 type ExchangeCoinDomain struct {

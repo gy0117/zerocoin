@@ -1,8 +1,8 @@
 package svc
 
 import (
+	"common/kafka"
 	"trade-engine/internal/config"
-	"zero-common/kafka"
 )
 
 type ServiceContext struct {

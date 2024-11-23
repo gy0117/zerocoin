@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"common/tools"
 	"context"
 	"github.com/jinzhu/copier"
 	"github.com/pkg/errors"
@@ -9,7 +10,6 @@ import (
 	"time"
 	"ucenter-api/internal/svc"
 	"ucenter-api/internal/types"
-	"zero-common/tools"
 )
 
 type LoginLogic struct {
@@ -26,7 +26,7 @@ func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic 
 	}
 }
 
-func (l LoginLogic) Login(req *types.LoginReq) (*types.LoginResp, error) {
+func (l *LoginLogic) Login(req *types.LoginReq) (*types.LoginResp, error) {
 	ctx, cancel := context.WithTimeout(l.ctx, time.Second*30)
 	defer cancel()
 
@@ -43,7 +43,7 @@ func (l LoginLogic) Login(req *types.LoginReq) (*types.LoginResp, error) {
 	return result, nil
 }
 
-func (l LoginLogic) CheckLogin(token string, f func() bool) (bool, error) {
+func (l *LoginLogic) CheckLogin(token string, f func() bool) (bool, error) {
 	// jwt 解析token
 	_, err := tools.ParseToken(token, l.svcCtx.Config.Jwt.AccessSecret)
 
@@ -55,4 +55,18 @@ func (l LoginLogic) CheckLogin(token string, f func() bool) (bool, error) {
 		return false, nil
 	}
 	return true, nil
+}
+
+func (l *LoginLogic) RefreshToken(refreshToken string) (string, error) {
+	userId, err := tools.ParseToken(refreshToken, l.svcCtx.Config.Jwt.AccessSecret)
+
+	if err != nil {
+		return "", errors.Wrapf(err, "parse refresh-token: %s", refreshToken)
+	}
+
+	newAccessToken, err := tools.GenerateAccessToken(userId)
+	if err != nil {
+		return "", errors.Wrapf(err, "failed to generate access token: %s", refreshToken)
+	}
+	return newAccessToken, nil
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"common/interceptor/rpcserver"
 	"flag"
 	"github.com/zeromicro/go-zero/core/logx"
 	"grpc-common/market/types/market"
@@ -8,7 +9,6 @@ import (
 	"market-rpc/internal/config"
 	"market-rpc/internal/server"
 	"market-rpc/internal/svc"
-	"zero-common/interceptor/rpcserver"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"

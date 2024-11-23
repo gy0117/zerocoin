@@ -1,12 +1,12 @@
 package dao
 
 import (
+	"common/zerodb"
+	"common/zerodb/gorms"
 	"context"
 	"exchange-rpc/internal/model"
 	"exchange-rpc/internal/repo"
 	"gorm.io/gorm"
-	"zero-common/zerodb"
-	"zero-common/zerodb/gorms"
 )
 
 var _ repo.OrderRepo = (*OrderDao)(nil)

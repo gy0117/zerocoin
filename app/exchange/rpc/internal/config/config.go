@@ -1,11 +1,11 @@
 package config
 
 import (
+	"common/kafka"
 	"exchange-rpc/internal/db"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/cache"
 	"github.com/zeromicro/go-zero/zrpc"
-	"zero-common/kafka"
 )
 
 type Config struct {

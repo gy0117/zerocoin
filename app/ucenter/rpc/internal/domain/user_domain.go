@@ -1,6 +1,8 @@
 package domain
 
 import (
+	"common/tools"
+	"common/zerodb"
 	"context"
 	"errors"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -8,8 +10,6 @@ import (
 	"ucenter-rpc/internal/dao"
 	"ucenter-rpc/internal/model"
 	"ucenter-rpc/internal/repo"
-	"zero-common/tools"
-	"zero-common/zerodb"
 )
 
 type UserDomain struct {

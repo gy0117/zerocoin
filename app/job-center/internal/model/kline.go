@@ -1,7 +1,7 @@
 package model
 
 import (
-	"zero-common/tools"
+	"common/tools"
 )
 
 // Kline 存入mongo db

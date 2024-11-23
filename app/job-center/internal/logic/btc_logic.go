@@ -1,6 +1,8 @@
 package logic
 
 import (
+	"common/kafka"
+	"common/tools"
 	"context"
 	"encoding/json"
 	"errors"
@@ -13,8 +15,6 @@ import (
 	"job-center/internal/domain"
 	"job-center/internal/model"
 	"sync"
-	"zero-common/kafka"
-	"zero-common/tools"
 )
 
 const rdsBtcTxBlockHeight = "rds::btc::tx::block::height"

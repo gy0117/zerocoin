@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 
-	"zero-common/kafka"
-	"zero-common/tools"
+	"common/kafka"
+	"common/tools"
 )
 
 const success = "0"

@@ -1,9 +1,9 @@
 package domain
 
 import (
+	"common/tools"
 	"github.com/zeromicro/go-zero/core/stores/cache"
 	"strings"
-	"zero-common/tools"
 )
 
 // 1 USDT 对应多少CNY

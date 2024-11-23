@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"common/pages"
 	"context"
 	"github.com/jinzhu/copier"
 	"github.com/pkg/errors"
@@ -11,7 +12,6 @@ import (
 	"time"
 	"ucenter-api/internal/svc"
 	"ucenter-api/internal/types"
-	"zero-common/pages"
 )
 
 type WithdrawLogic struct {

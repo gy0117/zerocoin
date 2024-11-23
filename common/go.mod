@@ -1,4 +1,4 @@
-module zero-common
+module common
 
 go 1.22
 

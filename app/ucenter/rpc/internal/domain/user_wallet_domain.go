@@ -1,6 +1,8 @@
 package domain
 
 import (
+	"common/zerodb"
+	"common/zerodb/tran"
 	"context"
 	"errors"
 	"fmt"
@@ -9,8 +11,6 @@ import (
 	"ucenter-rpc/internal/dao"
 	"ucenter-rpc/internal/model"
 	"ucenter-rpc/internal/repo"
-	"zero-common/zerodb"
-	"zero-common/zerodb/tran"
 )
 
 type WalletDomain struct {

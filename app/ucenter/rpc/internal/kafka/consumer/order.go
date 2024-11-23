@@ -1,6 +1,9 @@
 package consumer
 
 import (
+	"common/kafka"
+	"common/operate"
+	"common/zerodb"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -11,9 +14,6 @@ import (
 	"time"
 	"ucenter-rpc/internal/domain"
 	"ucenter-rpc/internal/model"
-	"zero-common/kafka"
-	"zero-common/operate"
-	"zero-common/zerodb"
 )
 
 const (

@@ -1,6 +1,8 @@
 package consumer
 
 import (
+	"common/kafka"
+	"common/zerodb"
 	"context"
 	"encoding/json"
 	"errors"
@@ -11,8 +13,6 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"time"
-	"zero-common/kafka"
-	"zero-common/zerodb"
 )
 
 // 消费订单的消息，拿到新创建的订单

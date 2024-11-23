@@ -4,14 +4,13 @@ import (
 	"context"
 	"github.com/pkg/errors"
 
+	"common/tools"
+	"common/zerr"
 	"github.com/golang-jwt/jwt/v4"
 	"grpc-common/ucenter/types/login"
-	"time"
 	"ucenter-rpc/internal/domain"
 	"ucenter-rpc/internal/svc"
 	"ucenter-rpc/internal/verify"
-	"zero-common/tools"
-	"zero-common/zerr"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -78,13 +77,19 @@ func (l *LoginLogic) Login(in *login.LoginReq) (*login.LoginResp, error) {
 	}
 
 	// 3. 登录成功，将jwt token返回给前端
-	token, err := l.getJwtToken(l.svcCtx.Config.Jwt.AccessSecret, time.Now().Unix(), l.svcCtx.Config.Jwt.AccessExpire, user.Id)
+	//token, err := l.getJwtToken(l.svcCtx.Config.Jwt.AccessSecret, time.Now().Unix(), l.svcCtx.Config.Jwt.AccessExpire, user.Id)
+	accessToken, err := tools.GenerateAccessToken(user.Id)
 	if err != nil {
-		return nil, errors.Wrapf(ErrGenerateToken, "failed to generate token, and phone: %s, err: %v", in.Username, err)
+		return nil, errors.Wrapf(ErrGenerateToken, "failed to generate access token, and phone: %s, err: %v", in.Username, err)
+	}
+	refreshToken, err := tools.GenerateRefreshToken(user.Id)
+	if err != nil {
+		return nil, errors.Wrapf(ErrGenerateToken, "failed to generate refresh token, and phone: %s, err: %v", in.Username, err)
 	}
 
 	return &login.LoginResp{
-		Token:         token,
+		AccessToken:   accessToken,
+		RefreshToken:  refreshToken,
 		Id:            user.Id,
 		Username:      user.Username,
 		UserLevel:     user.UserLevelStr(),
@@ -131,17 +136,17 @@ func (l *LoginLogic) getJwtToken(secretKey string, iat, seconds, userId int64) (
 //	return
 //}
 
-func (l *LoginLogic) parseToken(token string) (*Claims, error) {
-
-	tokenClaims, err := jwt.ParseWithClaims(token, &Claims{}, func(t *jwt.Token) (interface{}, error) {
-		return l.svcCtx.Config.Jwt.AccessSecret, nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	// 验证token
-	if claims, ok := tokenClaims.Claims.(*Claims); ok && tokenClaims.Valid {
-		return claims, nil
-	}
-	return nil, errors.New("valid token")
-}
+//func (l *LoginLogic) parseToken(token string) (*Claims, error) {
+//
+//	tokenClaims, err := jwt.ParseWithClaims(token, &Claims{}, func(t *jwt.Token) (interface{}, error) {
+//		return l.svcCtx.Config.Jwt.AccessSecret, nil
+//	})
+//	if err != nil {
+//		return nil, err
+//	}
+//	// 验证token
+//	if claims, ok := tokenClaims.Claims.(*Claims); ok && tokenClaims.Valid {
+//		return claims, nil
+//	}
+//	return nil, errors.New("valid token")
+//}

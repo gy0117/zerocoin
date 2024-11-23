@@ -1,6 +1,8 @@
 package svc
 
 import (
+	"common/kafka"
+	"common/zerodb"
 	"github.com/zeromicro/go-zero/core/stores/cache"
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/zrpc"
@@ -9,8 +11,6 @@ import (
 	"ucenter-rpc/internal/config"
 	"ucenter-rpc/internal/db"
 	"ucenter-rpc/internal/kafka/consumer"
-	"zero-common/kafka"
-	"zero-common/zerodb"
 )
 
 const (

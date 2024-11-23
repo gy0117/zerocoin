@@ -10,5 +10,5 @@ use (
 	./app/ucenter/rpc
 	./grpc-common
 	./trade-engine
-	./zero-common
+	./common
 )

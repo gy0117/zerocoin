@@ -4,9 +4,7 @@ import (
 	"exchange-rpc/internal/config"
 	"exchange-rpc/internal/svc"
 	"flag"
-	"fmt"
 	"github.com/dtm-labs/client/dtmgrpc"
-	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"
 	"grpc-common/exchange/types/order"
@@ -80,15 +78,4 @@ func ac(ctx *svc.ServiceContext) {
 		logx.Error("saga, err: ", err)
 		return
 	}
-}
-
-func buildTarget(ctx *svc.ServiceContext) (string, error) {
-	etcd := ctx.Config.Etcd
-	if len(etcd.Hosts) == 0 {
-		return "", errors.New("build target failed")
-	}
-	host := etcd.Hosts[0]
-	key := etcd.Key
-	target := fmt.Sprintf("etcd://%s/%s", host, key)
-	return target, nil
 }

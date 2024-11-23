@@ -7,6 +7,9 @@ import (
 	"time"
 )
 
+const secretKey = "zerocoin-gogohigher-!@#$"
+const issuer = "zerocoin-marsxingzhi"
+
 func ParseToken(tokenString string, secret string) (int64, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Don't forget to validate the alg is what you expect:
@@ -29,4 +32,22 @@ func ParseToken(tokenString string, secret string) (int64, error) {
 	} else {
 		return 0, err
 	}
+}
+
+func GenerateAccessToken(userId int64) (string, error) {
+	claims := make(jwt.MapClaims)
+	claims["exp"] = time.Now().Add(15 * time.Minute).Unix()
+	claims["userId"] = userId
+	token := jwt.New(jwt.SigningMethodHS256)
+	token.Claims = claims
+	return token.SignedString([]byte(secretKey))
+}
+
+func GenerateRefreshToken(userId int64) (string, error) {
+	claims := make(jwt.MapClaims)
+	claims["exp"] = time.Now().Add(7 * 24 * time.Hour).Unix()
+	claims["userId"] = userId
+	token := jwt.New(jwt.SigningMethodHS256)
+	token.Claims = claims
+	return token.SignedString([]byte(secretKey))
 }

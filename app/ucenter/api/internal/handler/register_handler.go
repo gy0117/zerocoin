@@ -1,10 +1,10 @@
 package handler
 
 import (
+	"common/result"
+	"common/tools"
 	"net/http"
 	"ucenter-api/internal/logic"
-	"zero-common/result"
-	"zero-common/tools"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
 	"ucenter-api/internal/svc"

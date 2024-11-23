@@ -1,12 +1,12 @@
 package consumer
 
 import (
+	"common/kafka"
+	"common/zerodb"
 	"encoding/json"
 	"github.com/zeromicro/go-zero/core/logx"
 	"ucenter-rpc/internal/domain"
 	"ucenter-rpc/internal/model"
-	"zero-common/kafka"
-	"zero-common/zerodb"
 )
 
 func ConsumeBtcWithdraw(kCli *kafka.KafkaClient, db *zerodb.ZeroDB) {

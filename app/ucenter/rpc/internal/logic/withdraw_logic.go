@@ -1,6 +1,12 @@
 package logic
 
 import (
+	"common/kafka"
+	"common/operate"
+	"common/tools"
+	"common/zerodb"
+	"common/zerodb/tran"
+	"common/zerr"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -13,12 +19,6 @@ import (
 	"ucenter-rpc/internal/domain"
 	"ucenter-rpc/internal/model"
 	"ucenter-rpc/internal/svc"
-	"zero-common/kafka"
-	"zero-common/operate"
-	"zero-common/tools"
-	"zero-common/zerodb"
-	"zero-common/zerodb/tran"
-	"zero-common/zerr"
 )
 
 var ErrWithdraw = zerr.NewCodeErr(zerr.WITHDRAW_ERROR)

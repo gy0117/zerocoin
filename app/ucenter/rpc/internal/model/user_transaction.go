@@ -4,7 +4,7 @@ package model
 
 import (
 	"github.com/jinzhu/copier"
-	"zero-common/tools"
+	"common/tools"
 )
 
 type UserTransaction struct {

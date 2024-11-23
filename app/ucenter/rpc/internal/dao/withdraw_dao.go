@@ -1,11 +1,11 @@
 package dao
 
 import (
+	"common/zerodb"
+	"common/zerodb/gorms"
 	"context"
 	"ucenter-rpc/internal/model"
 	"ucenter-rpc/internal/repo"
-	"zero-common/zerodb"
-	"zero-common/zerodb/gorms"
 )
 
 var _ repo.WithdrawRepo = (*WithdrawDao)(nil)

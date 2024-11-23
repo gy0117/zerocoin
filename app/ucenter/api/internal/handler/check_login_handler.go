@@ -1,10 +1,10 @@
 package handler
 
 import (
+	"common/result"
 	"net/http"
 	"ucenter-api/internal/logic"
 	"ucenter-api/internal/svc"
-	"zero-common/result"
 )
 
 func CheckLoginHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {

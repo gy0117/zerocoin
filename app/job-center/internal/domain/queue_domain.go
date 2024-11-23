@@ -1,12 +1,12 @@
 package domain
 
 import (
+	"common/kafka"
 	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
 	"job-center/internal/model"
-	"zero-common/kafka"
 )
 
 const KLINE_1M = "kline_1m"

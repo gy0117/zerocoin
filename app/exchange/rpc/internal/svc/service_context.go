@@ -1,6 +1,8 @@
 package svc
 
 import (
+	"common/kafka"
+	"common/zerodb"
 	"exchange-rpc/internal/config"
 	"exchange-rpc/internal/db"
 	"exchange-rpc/internal/kafka/consumer"
@@ -10,8 +12,6 @@ import (
 	"github.com/zeromicro/go-zero/zrpc"
 	"grpc-common/market/mclient"
 	"grpc-common/ucenter/uclient"
-	"zero-common/kafka"
-	"zero-common/zerodb"
 )
 
 type ServiceContext struct {

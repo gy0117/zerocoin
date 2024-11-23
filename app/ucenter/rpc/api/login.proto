@@ -15,17 +15,17 @@ message LoginReq {
 
 message LoginResp {
   string username = 1;
-  string token = 2;
-  string userLevel = 3;
-  string realName = 4;
-  string country = 5;
-  string avatar = 6;
-  string promotionCode = 7;
-  int64 id = 8;
-  int32 loginCount = 9;
-  string superPartner = 10;
-  int32 userRate = 11;
-
+  string accessToken = 2;
+  string refreshToken = 3;
+  string userLevel = 4;
+  string realName = 5;
+  string country = 6;
+  string avatar = 7;
+  string promotionCode = 8;
+  int64 id = 9;
+  int32 loginCount = 10;
+  string superPartner = 11;
+  int32 userRate = 12;
 }
 
 message CaptchaReq {

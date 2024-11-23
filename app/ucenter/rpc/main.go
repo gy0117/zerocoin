@@ -1,13 +1,13 @@
 package main
 
 import (
+	"common/interceptor/rpcserver"
 	"flag"
 	"github.com/zeromicro/go-zero/core/logx"
 	"grpc-common/ucenter/types/login"
 	"grpc-common/ucenter/types/user"
 	"grpc-common/ucenter/types/wallet"
 	"grpc-common/ucenter/types/withdraw"
-	"zero-common/interceptor/rpcserver"
 
 	"grpc-common/ucenter/types/register"
 	"ucenter-rpc/internal/config"

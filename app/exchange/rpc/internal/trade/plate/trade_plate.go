@@ -1,9 +1,9 @@
 package plate
 
 import (
+	"common/operate"
 	"exchange-rpc/internal/model"
 	"sync"
-	"zero-common/operate"
 )
 
 const (

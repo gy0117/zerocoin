@@ -50,6 +50,11 @@ func addLoginRouters(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/uc/check/login",
 				Handler: CheckLoginHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/uc/refresh/token",
+				Handler: RefreshTokenHandler(serverCtx),
+			},
 		},
 	)
 }

@@ -1,13 +1,13 @@
 package logic
 
 import (
+	"common/tools"
 	"encoding/json"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/cache"
 	"job-center/internal/config"
 	"job-center/internal/model"
 	"time"
-	"zero-common/tools"
 )
 
 // 1 USDT 对应多少CNY

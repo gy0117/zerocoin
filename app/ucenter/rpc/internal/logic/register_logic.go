@@ -1,12 +1,12 @@
 package logic
 
 import (
+	"common/tools"
+	"common/zerr"
 	"context"
 	"time"
 	"ucenter-rpc/internal/domain"
 	"ucenter-rpc/internal/verify"
-	"zero-common/tools"
-	"zero-common/zerr"
 
 	"grpc-common/ucenter/types/register"
 	"ucenter-rpc/internal/svc"

@@ -1,10 +1,10 @@
 package verify
 
 import (
+	"common/tools"
 	"encoding/json"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
-	"zero-common/tools"
 )
 
 const (

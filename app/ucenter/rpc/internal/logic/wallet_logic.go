@@ -1,6 +1,11 @@
 package logic
 
 import (
+	"common/btc"
+	"common/dtmutil"
+	"common/operate"
+	"common/tools"
+	"common/zerr"
 	"context"
 	"database/sql"
 	"fmt"
@@ -19,11 +24,6 @@ import (
 	"ucenter-rpc/internal/domain"
 	"ucenter-rpc/internal/svc"
 	"ucenter-rpc/internal/verify"
-	"zero-common/btc"
-	"zero-common/dtmutil"
-	"zero-common/operate"
-	"zero-common/tools"
-	"zero-common/zerr"
 )
 
 var ErrFindWallet = zerr.NewCodeErr(zerr.FIND_WALLET_ERROR)

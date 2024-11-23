@@ -1,10 +1,10 @@
 package model
 
 import (
+	"common/tools"
 	"github.com/jinzhu/copier"
 	"github.com/zeromicro/go-zero/core/logx"
 	"grpc-common/market/types/market"
-	"zero-common/tools"
 )
 
 type WithdrawRecord struct {
