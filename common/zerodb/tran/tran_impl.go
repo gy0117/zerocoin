@@ -1,9 +1,9 @@
 package tran
 
 import (
+	"common/zerodb"
+	"common/zerodb/gorms"
 	"gorm.io/gorm"
-	"zero-common/zerodb"
-	"zero-common/zerodb/gorms"
 )
 
 type TransactionImpl struct {

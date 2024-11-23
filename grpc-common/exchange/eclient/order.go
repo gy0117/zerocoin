@@ -21,16 +21,15 @@ type (
 	Empty              = order.Empty
 
 	Order interface {
-		GetHistoryOrder(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderResp, error)
-		GetCurrentOrder(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderResp, error)
+		QueryHistoryOrders(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderResp, error)
+		QueryCurrentOrders(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderResp, error)
+		QueryCompleteOrders(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderResp, error)
 		AddOrder(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*AddOrderResp, error)
 		CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*AddOrderResp, error)
 		CreateOrderRevert(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*AddOrderResp, error)
 		FindByOrderId(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*ExchangeOrder, error)
 		CancelOrder(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*CancelOrderResp, error)
-		// 将订单发送到买卖盘
 		SendOrder2Plate(ctx context.Context, in *SendOrderRequest, opts ...grpc.CallOption) (*Empty, error)
-		// 撤销 将订单发送到买卖盘
 		SendOrder2PlateRevert(ctx context.Context, in *SendOrderRequest, opts ...grpc.CallOption) (*Empty, error)
 	}
 
@@ -45,14 +44,20 @@ func NewOrder(cli zrpc.Client) Order {
 	}
 }
 
-func (o *defaultOrder) GetHistoryOrder(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderResp, error) {
+func (o *defaultOrder) QueryHistoryOrders(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderResp, error) {
 	client := order.NewOrderServiceClient(o.cli.Conn())
-	return client.GetHistoryOrder(ctx, in, opts...)
+	return client.QueryHistoryOrders(ctx, in, opts...)
 }
 
-func (o *defaultOrder) GetCurrentOrder(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderResp, error) {
+func (o *defaultOrder) QueryCurrentOrders(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderResp, error) {
 	client := order.NewOrderServiceClient(o.cli.Conn())
-	return client.GetCurrentOrder(ctx, in, opts...)
+	return client.QueryCurrentOrders(ctx, in, opts...)
+}
+
+
+func (o *defaultOrder) QueryCompleteOrders(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderResp, error) {
+	client := order.NewOrderServiceClient(o.cli.Conn())
+	return client.QueryCompleteOrders(ctx, in, opts...)
 }
 
 func (o *defaultOrder) AddOrder(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*AddOrderResp, error) {

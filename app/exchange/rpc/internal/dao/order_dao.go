@@ -74,7 +74,7 @@ func (dao *OrderDao) FindCurrentTradingCount(ctx context.Context, memId int64, s
 	return
 }
 
-func (dao *OrderDao) GetHistoryOrder(ctx context.Context, symbol string, memId int64, pageNo int64, pageSize int64) (list []*model.ExchangeOrder, total int64, err error) {
+func (dao *OrderDao) QueryHistoryOrders(ctx context.Context, symbol string, memId int64, pageNo int64, pageSize int64) (list []*model.ExchangeOrder, total int64, err error) {
 	session := dao.conn.Session(ctx)
 	// 找到第pageNo页的数据，一页的数据量为pageSize
 	err = session.Model(&model.ExchangeOrder{}).Where("symbol=? and user_id=?", symbol, memId).Limit(int(pageSize)).Offset(int((pageNo - 1) * pageSize)).Find(&list).Error
@@ -85,7 +85,7 @@ func (dao *OrderDao) GetHistoryOrder(ctx context.Context, symbol string, memId i
 	return
 }
 
-func (dao *OrderDao) GetCurrentOrder(ctx context.Context, symbol string, memId int64, pageNo int64, pageSize int64) (list []*model.ExchangeOrder, total int64, err error) {
+func (dao *OrderDao) QueryCurrentOrders(ctx context.Context, symbol string, memId int64, pageNo int64, pageSize int64) (list []*model.ExchangeOrder, total int64, err error) {
 	session := dao.conn.Session(ctx)
 	// 找到第pageNo页的数据，一页的数据量为pageSize
 	err = session.Model(&model.ExchangeOrder{}).Where("symbol=? and user_id=? and status=?", symbol, memId, model.OrderStatus_Trading).Limit(int(pageSize)).Offset(int((pageNo - 1) * pageSize)).Find(&list).Error
@@ -93,6 +93,17 @@ func (dao *OrderDao) GetCurrentOrder(ctx context.Context, symbol string, memId i
 		return nil, 0, nil
 	}
 	err = session.Model(&model.ExchangeOrder{}).Where("symbol=? and user_id=?  and status=?", symbol, memId, model.OrderStatus_Trading).Count(&total).Error
+	return
+}
+
+func (dao *OrderDao) QueryCompleteOrders(ctx context.Context, symbol string, memId int64, pageNo int64, pageSize int64) (list []*model.ExchangeOrder, total int64, err error) {
+	session := dao.conn.Session(ctx)
+	// 找到第pageNo页的数据，一页的数据量为pageSize
+	err = session.Model(&model.ExchangeOrder{}).Where("symbol=? and user_id=? and status=?", symbol, memId, model.OrderStatus_Completed).Limit(int(pageSize)).Offset(int((pageNo - 1) * pageSize)).Find(&list).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil, 0, nil
+	}
+	err = session.Model(&model.ExchangeOrder{}).Where("symbol=? and user_id=? and status=?", symbol, memId, model.OrderStatus_Completed).Count(&total).Error
 	return
 }
 

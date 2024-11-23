@@ -23,8 +23,9 @@ const (
 	OrderService_CreateOrder_FullMethodName           = "/order.OrderService/CreateOrder"
 	OrderService_CreateOrderRevert_FullMethodName     = "/order.OrderService/CreateOrderRevert"
 	OrderService_CancelOrder_FullMethodName           = "/order.OrderService/CancelOrder"
-	OrderService_GetHistoryOrder_FullMethodName       = "/order.OrderService/GetHistoryOrder"
-	OrderService_GetCurrentOrder_FullMethodName       = "/order.OrderService/GetCurrentOrder"
+	OrderService_QueryHistoryOrders_FullMethodName    = "/order.OrderService/QueryHistoryOrders"
+	OrderService_QueryCurrentOrders_FullMethodName    = "/order.OrderService/QueryCurrentOrders"
+	OrderService_QueryCompleteOrders_FullMethodName   = "/order.OrderService/QueryCompleteOrders"
 	OrderService_FindByOrderId_FullMethodName         = "/order.OrderService/FindByOrderId"
 	OrderService_SendOrder2Plate_FullMethodName       = "/order.OrderService/SendOrder2Plate"
 	OrderService_SendOrder2PlateRevert_FullMethodName = "/order.OrderService/SendOrder2PlateRevert"
@@ -42,10 +43,12 @@ type OrderServiceClient interface {
 	CreateOrderRevert(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*AddOrderResp, error)
 	// 取消订单
 	CancelOrder(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*CancelOrderResp, error)
-	// 获取用户历史订单列表
-	GetHistoryOrder(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderResp, error)
-	// 获取用户当前订单列表
-	GetCurrentOrder(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderResp, error)
+	// 查询用户历史订单列表
+	QueryHistoryOrders(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderResp, error)
+	// 查询用户当前订单列表
+	QueryCurrentOrders(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderResp, error)
+	// 查询已经完成的订单
+	QueryCompleteOrders(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderResp, error)
 	// 查询订单
 	FindByOrderId(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*ExchangeOrder, error)
 	// 将订单发送到买卖盘
@@ -98,18 +101,27 @@ func (c *orderServiceClient) CancelOrder(ctx context.Context, in *OrderReq, opts
 	return out, nil
 }
 
-func (c *orderServiceClient) GetHistoryOrder(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderResp, error) {
+func (c *orderServiceClient) QueryHistoryOrders(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderResp, error) {
 	out := new(OrderResp)
-	err := c.cc.Invoke(ctx, OrderService_GetHistoryOrder_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, OrderService_QueryHistoryOrders_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *orderServiceClient) GetCurrentOrder(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderResp, error) {
+func (c *orderServiceClient) QueryCurrentOrders(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderResp, error) {
 	out := new(OrderResp)
-	err := c.cc.Invoke(ctx, OrderService_GetCurrentOrder_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, OrderService_QueryCurrentOrders_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *orderServiceClient) QueryCompleteOrders(ctx context.Context, in *OrderReq, opts ...grpc.CallOption) (*OrderResp, error) {
+	out := new(OrderResp)
+	err := c.cc.Invoke(ctx, OrderService_QueryCompleteOrders_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -155,10 +167,12 @@ type OrderServiceServer interface {
 	CreateOrderRevert(context.Context, *CreateOrderRequest) (*AddOrderResp, error)
 	// 取消订单
 	CancelOrder(context.Context, *OrderReq) (*CancelOrderResp, error)
-	// 获取用户历史订单列表
-	GetHistoryOrder(context.Context, *OrderReq) (*OrderResp, error)
-	// 获取用户当前订单列表
-	GetCurrentOrder(context.Context, *OrderReq) (*OrderResp, error)
+	// 查询用户历史订单列表
+	QueryHistoryOrders(context.Context, *OrderReq) (*OrderResp, error)
+	// 查询用户当前订单列表
+	QueryCurrentOrders(context.Context, *OrderReq) (*OrderResp, error)
+	// 查询已经完成的订单
+	QueryCompleteOrders(context.Context, *OrderReq) (*OrderResp, error)
 	// 查询订单
 	FindByOrderId(context.Context, *OrderReq) (*ExchangeOrder, error)
 	// 将订单发送到买卖盘
@@ -184,11 +198,14 @@ func (UnimplementedOrderServiceServer) CreateOrderRevert(context.Context, *Creat
 func (UnimplementedOrderServiceServer) CancelOrder(context.Context, *OrderReq) (*CancelOrderResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CancelOrder not implemented")
 }
-func (UnimplementedOrderServiceServer) GetHistoryOrder(context.Context, *OrderReq) (*OrderResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetHistoryOrder not implemented")
+func (UnimplementedOrderServiceServer) QueryHistoryOrders(context.Context, *OrderReq) (*OrderResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method QueryHistoryOrders not implemented")
 }
-func (UnimplementedOrderServiceServer) GetCurrentOrder(context.Context, *OrderReq) (*OrderResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCurrentOrder not implemented")
+func (UnimplementedOrderServiceServer) QueryCurrentOrders(context.Context, *OrderReq) (*OrderResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method QueryCurrentOrders not implemented")
+}
+func (UnimplementedOrderServiceServer) QueryCompleteOrders(context.Context, *OrderReq) (*OrderResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method QueryCompleteOrders not implemented")
 }
 func (UnimplementedOrderServiceServer) FindByOrderId(context.Context, *OrderReq) (*ExchangeOrder, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FindByOrderId not implemented")
@@ -284,38 +301,56 @@ func _OrderService_CancelOrder_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _OrderService_GetHistoryOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _OrderService_QueryHistoryOrders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(OrderReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(OrderServiceServer).GetHistoryOrder(ctx, in)
+		return srv.(OrderServiceServer).QueryHistoryOrders(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: OrderService_GetHistoryOrder_FullMethodName,
+		FullMethod: OrderService_QueryHistoryOrders_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrderServiceServer).GetHistoryOrder(ctx, req.(*OrderReq))
+		return srv.(OrderServiceServer).QueryHistoryOrders(ctx, req.(*OrderReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _OrderService_GetCurrentOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _OrderService_QueryCurrentOrders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(OrderReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(OrderServiceServer).GetCurrentOrder(ctx, in)
+		return srv.(OrderServiceServer).QueryCurrentOrders(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: OrderService_GetCurrentOrder_FullMethodName,
+		FullMethod: OrderService_QueryCurrentOrders_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrderServiceServer).GetCurrentOrder(ctx, req.(*OrderReq))
+		return srv.(OrderServiceServer).QueryCurrentOrders(ctx, req.(*OrderReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OrderService_QueryCompleteOrders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(OrderReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderServiceServer).QueryCompleteOrders(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrderService_QueryCompleteOrders_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderServiceServer).QueryCompleteOrders(ctx, req.(*OrderReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -398,12 +433,16 @@ var OrderService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _OrderService_CancelOrder_Handler,
 		},
 		{
-			MethodName: "GetHistoryOrder",
-			Handler:    _OrderService_GetHistoryOrder_Handler,
+			MethodName: "QueryHistoryOrders",
+			Handler:    _OrderService_QueryHistoryOrders_Handler,
 		},
 		{
-			MethodName: "GetCurrentOrder",
-			Handler:    _OrderService_GetCurrentOrder_Handler,
+			MethodName: "QueryCurrentOrders",
+			Handler:    _OrderService_QueryCurrentOrders_Handler,
+		},
+		{
+			MethodName: "QueryCompleteOrders",
+			Handler:    _OrderService_QueryCompleteOrders_Handler,
 		},
 		{
 			MethodName: "FindByOrderId",

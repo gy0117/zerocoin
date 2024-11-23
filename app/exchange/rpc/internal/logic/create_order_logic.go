@@ -46,13 +46,14 @@ func NewCreateOrderLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Creat
 }
 
 func dbGet(c config.Config) *dtmutil.DB {
+	master := c.Mysql.Master[0]
 	var dbConf = dtmcli.DBConf{
-		Driver:   c.Mysql.Driver,
-		Host:     c.Mysql.Host,
-		Port:     c.Mysql.Port,
-		User:     c.Mysql.User,
-		Password: c.Mysql.Password,
-		Db:       c.Mysql.Db,
+		Driver:   master.Driver,
+		Host:     master.Host,
+		Port:     master.Port,
+		User:     master.User,
+		Password: master.Password,
+		Db:       master.Db,
 	}
 	return dtmutil.DbGet(dbConf)
 }

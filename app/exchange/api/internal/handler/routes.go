@@ -17,12 +17,17 @@ func addOrderRouters(server *rest.Server, serverCtx *svc.ServiceContext) {
 		{
 			Method:  http.MethodPost,
 			Path:    "/exchange/order/history",
-			Handler: GetHistoryOrders(serverCtx),
+			Handler: QueryHistoryOrders(serverCtx),
 		},
 		{
 			Method:  http.MethodPost,
 			Path:    "/exchange/order/current",
-			Handler: GetCurrentOrders(serverCtx),
+			Handler: QueryCurrentOrders(serverCtx),
+		},
+		{
+			Method:  http.MethodPost,
+			Path:    "/exchange/order/complete",
+			Handler: QueryCompleteOrders(serverCtx),
 		},
 		{
 			Method:  http.MethodPost,

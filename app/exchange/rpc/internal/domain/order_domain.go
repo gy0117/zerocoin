@@ -24,8 +24,8 @@ func NewOrderDomain(db *zerodb.ZeroDB) *OrderDomain {
 	}
 }
 
-func (d *OrderDomain) GetHistoryOrder(ctx context.Context, symbol string, memId int64, pageNo int64, pageSize int64) ([]*model.ExchangeOrder, int64, error) {
-	list, total, err := d.orderRepo.GetHistoryOrder(ctx, symbol, memId, pageNo, pageSize)
+func (d *OrderDomain) QueryHistoryOrders(ctx context.Context, symbol string, memId int64, pageNo int64, pageSize int64) ([]*model.ExchangeOrder, int64, error) {
+	list, total, err := d.orderRepo.QueryHistoryOrders(ctx, symbol, memId, pageNo, pageSize)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -35,8 +35,19 @@ func (d *OrderDomain) GetHistoryOrder(ctx context.Context, symbol string, memId 
 	return list, total, nil
 }
 
-func (d *OrderDomain) GetCurrentOrder(ctx context.Context, symbol string, memId int64, pageNo int64, pageSize int64) ([]*model.ExchangeOrder, int64, error) {
-	list, total, err := d.orderRepo.GetCurrentOrder(ctx, symbol, memId, pageNo, pageSize)
+func (d *OrderDomain) QueryCurrentOrders(ctx context.Context, symbol string, memId int64, pageNo int64, pageSize int64) ([]*model.ExchangeOrder, int64, error) {
+	list, total, err := d.orderRepo.QueryCurrentOrders(ctx, symbol, memId, pageNo, pageSize)
+	if err != nil {
+		return nil, 0, err
+	}
+	if list == nil {
+		return nil, 0, errors.New("data not found")
+	}
+	return list, total, nil
+}
+
+func (d *OrderDomain) QueryCompleteOrders(ctx context.Context, symbol string, memId int64, pageNo int64, pageSize int64) ([]*model.ExchangeOrder, int64, error) {
+	list, total, err := d.orderRepo.QueryCompleteOrders(ctx, symbol, memId, pageNo, pageSize)
 	if err != nil {
 		return nil, 0, err
 	}

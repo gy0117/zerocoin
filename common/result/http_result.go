@@ -1,6 +1,7 @@
 package result
 
 import (
+	"common/zerr"
 	"context"
 	"fmt"
 	"github.com/pkg/errors"
@@ -8,7 +9,6 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 	"google.golang.org/grpc/status"
 	"net/http"
-	"zero-common/zerr"
 )
 
 type ZeroCode int64

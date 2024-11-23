@@ -21,11 +21,22 @@ type Config struct {
 }
 
 type MysqlConfig struct {
-	DataSource string
-	Driver     string
-	Host       string
-	Port       int64
-	User       string
-	Password   string
-	Db         string
+	Master []struct {
+		DataSource string
+		Driver     string
+		Host       string
+		Port       int64
+		User       string
+		Password   string
+		Db         string
+	} `yaml:"master"`
+	Slaves []struct {
+		DataSource string
+		Driver     string
+		Host       string
+		Port       int64
+		User       string
+		Password   string
+		Db         string
+	} `yaml:"slaves"`
 }

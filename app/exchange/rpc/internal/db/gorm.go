@@ -30,3 +30,26 @@ func ConnMysql(dsn string) *zerodb.ZeroDB {
 	db.SetMaxIdleConns(maxIdleConnections)
 	return &zerodb.ZeroDB{Conn: _db}
 }
+
+// ConnMysql2 支持读写分离
+func ConnMysql2(dsn string, slaveDsn string) *zerodb.ZeroDB {
+	masterDB, err := gorm.Open(mysql.Open(dsn), &gorm.Config{Logger: logger.Default.LogMode(logger.Info)})
+	if err != nil {
+		panic("failed to connect to  master DB, err: " + err.Error())
+	}
+
+	// 从库连接
+	slaveDB, err := gorm.Open(mysql.Open(slaveDsn), &gorm.Config{Logger: logger.Default.LogMode(logger.Info)})
+	if err != nil {
+		panic("failed to connect to slave DB, err: " + err.Error())
+	}
+
+	db, _ := masterDB.DB()
+	// 连接池配置
+	db.SetMaxOpenConns(maxOpenConnections)
+	db.SetMaxIdleConns(maxIdleConnections)
+
+	// 配置主从分离
+	masterDB.Set("gorm:read_default", slaveDB)
+	return &zerodb.ZeroDB{Conn: masterDB}
+}

@@ -22,14 +22,19 @@ func NewOrderServer(svcCtx *svc.ServiceContext) *OrderServer {
 	}
 }
 
-func (o *OrderServer) GetHistoryOrder(ctx context.Context, req *order.OrderReq) (*order.OrderResp, error) {
-	l := logic.NewGetOrdersLogic(ctx, o.svcCtx)
-	return l.GetHistoryOrder(req)
+func (o *OrderServer) QueryHistoryOrders(ctx context.Context, req *order.OrderReq) (*order.OrderResp, error) {
+	l := logic.NewQueryOrdersLogic(ctx, o.svcCtx)
+	return l.QueryHistoryOrders(req)
 }
 
-func (o *OrderServer) GetCurrentOrder(ctx context.Context, req *order.OrderReq) (*order.OrderResp, error) {
-	l := logic.NewGetOrdersLogic(ctx, o.svcCtx)
-	return l.GetCurrentOrder(req)
+func (o *OrderServer) QueryCurrentOrders(ctx context.Context, req *order.OrderReq) (*order.OrderResp, error) {
+	l := logic.NewQueryOrdersLogic(ctx, o.svcCtx)
+	return l.QueryCurrentOrders(req)
+}
+
+func (o *OrderServer) QueryCompleteOrders(ctx context.Context, req *order.OrderReq) (*order.OrderResp, error) {
+	l := logic.NewQueryOrdersLogic(ctx, o.svcCtx)
+	return l.QueryCompleteOrders(req)
 }
 
 func (o *OrderServer) AddOrder(ctx context.Context, req *order.OrderReq) (*order.AddOrderResp, error) {

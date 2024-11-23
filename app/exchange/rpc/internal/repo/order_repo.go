@@ -7,8 +7,9 @@ import (
 )
 
 type OrderRepo interface {
-	GetHistoryOrder(ctx context.Context, symbol string, memId int64, pageNo int64, pageSize int64) (list []*model.ExchangeOrder, total int64, err error)
-	GetCurrentOrder(ctx context.Context, symbol string, memId int64, pageNo int64, pageSize int64) (list []*model.ExchangeOrder, total int64, err error)
+	QueryHistoryOrders(ctx context.Context, symbol string, memId int64, pageNo int64, pageSize int64) (list []*model.ExchangeOrder, total int64, err error)
+	QueryCurrentOrders(ctx context.Context, symbol string, memId int64, pageNo int64, pageSize int64) (list []*model.ExchangeOrder, total int64, err error)
+	QueryCompleteOrders(ctx context.Context, symbol string, memId int64, pageNo int64, pageSize int64) (list []*model.ExchangeOrder, total int64, err error)
 	FindCurrentTradingCount(ctx context.Context, memId int64, symbol string, direction int) (int64, error)
 	Save(ctx context.Context, conn zerodb.DbConn, order *model.ExchangeOrder) error
 	FindByOrderId(ctx context.Context, orderId string) (*model.ExchangeOrder, error)

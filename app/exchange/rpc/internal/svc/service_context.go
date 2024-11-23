@@ -43,7 +43,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	svc := &ServiceContext{
 		Config:      c,
 		Cache:       rdsCache,
-		DB:          db.ConnMysql(c.Mysql.DataSource),
+		DB:          db.ConnMysql2(c.Mysql.Master[0].DataSource, c.Mysql.Slaves[0].DataSource),
 		MongoClient: db.ConnectMongo(c.Mongo),
 		UserRpc:     uclient.NewUser(zrpc.MustNewClient(c.UCenter)),
 		MarketRpc:   mclient.NewMarket(zrpc.MustNewClient(c.Market)),

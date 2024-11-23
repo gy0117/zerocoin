@@ -92,10 +92,12 @@ service OrderService {
   rpc CreateOrderRevert(CreateOrderRequest) returns(AddOrderResp);
   // 取消订单
   rpc CancelOrder(OrderReq) returns(CancelOrderResp);
-  // 获取用户历史订单列表
-  rpc GetHistoryOrder(OrderReq) returns(OrderResp);
-  // 获取用户当前订单列表
-  rpc GetCurrentOrder(OrderReq) returns(OrderResp);
+  // 查询用户历史订单列表
+  rpc QueryHistoryOrders(OrderReq) returns(OrderResp);
+  // 查询用户当前订单列表
+  rpc QueryCurrentOrders(OrderReq) returns(OrderResp);
+  // 查询已经完成的订单
+  rpc QueryCompleteOrders(OrderReq) returns(OrderResp);
   // 查询订单
   rpc FindByOrderId(OrderReq) returns(ExchangeOrder);
   // 将订单发送到买卖盘
