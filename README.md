@@ -1,11 +1,11 @@
 # zerocoin      
 
+
 ### latest-update  
 1. Using distributed transaction to processing match-orders
 2. Optimize order queues using skip lists
 3. Support token revocation and token renewal
-
-
+4. Optimize order data with reading and writing separation
 
 
 
@@ -24,3 +24,9 @@ Improvements that can be added:
 - [x] Ability to cancel an order
 - [ ] Monitoring
 - [ ] Back up the order book in persistent storage
+
+
+
+### todo
+- [ ] Add payment module
+- [ ] Add front-end page
